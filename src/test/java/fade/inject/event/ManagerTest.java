@@ -10,163 +10,164 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EventManagerImplTest {
+class ManagerTest {
 
     @Test
     void testHandlerInvocation() {
-        EventManager eventManager = EventManager.builder().build();
-        eventManager.register(new Object() {
+        Manager manager = Manager.builder().build();
+        manager.register(new Object() {
             @Handler
             public void handle(@NotNull StringEvent event) {
-                event.context().string("B");
+                event.getContext().setString("B");
             }
         });
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertEquals("B", event.context().string());
+        assertEquals("B", event.getContext().getString());
     }
 
     @Test
     void testHandlerInvocationWithAnnotationEventType() {
-        EventManager eventManager = EventManager.builder().build();
-        eventManager.register(new Object() {
+        Manager manager = Manager.builder().build();
+        manager.register(new Object() {
             @Handler(event = StringEvent.class)
             public void handle(@NotNull StringEvent.StringEventContext context) {
-                context.string("B");
+                context.setString("B");
             }
         });
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertEquals("B", event.context().string());
+        assertEquals("B", event.getContext().getString());
     }
 
     @Test
     void testHandlerWithContextParameter() {
-        EventManager eventManager = EventManager.builder().build();
-        eventManager.register(new Object() {
+        Manager manager = Manager.builder().build();
+        manager.register(new Object() {
             @Handler
             public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
-                context.string("B");
+                context.setString("B");
             }
         });
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertEquals("B", event.context().string());
+        assertEquals("B", event.getContext().getString());
     }
 
     @Test
     void testThrowOnMissingAnnotation() {
-        EventManager eventManager = EventManager.builder().build();
-        assertThrows(PossibleMissingAnnotationException.class, () -> eventManager.register(new Object() {
+        Manager manager = Manager.builder().build();
+        assertThrows(PossibleMissingAnnotationException.class, () -> manager.register(new Object() {
             @SuppressWarnings("unused") // intentional
             public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
-                context.string("B");
+                context.setString("B");
             }
         }));
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertNotEquals("B", event.context().string());
+        assertNotEquals("B", event.getContext().getString());
     }
 
     @Test
     void testThrowOnMissingAnnotationWithSuppression() {
-        EventManager eventManager = EventManager.builder().build();
+        Manager manager = Manager.builder().build();
 
         // noinspection AnonymousInnerClassWithTooManyMethods
-        assertDoesNotThrow(() -> eventManager.register(new Object() {
+        assertDoesNotThrow(() -> manager.register(new Object() {
             @Ignore
             public void handle(@NotNull StringEvent event) {
-                event.context().string("C");
+                event.getContext().setString("C");
             }
 
             @Handler
             public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
-                context.string("B");
+                context.setString("B");
             }
         }));
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertEquals("B", event.context().string());
+        assertEquals("B", event.getContext().getString());
     }
 
     @Test
     void testIgnoreAnnotationOnIgnoredMethod() {
-        EventManager eventManager = EventManager.builder().build();
+        Manager manager = Manager.builder().build();
 
-        assertDoesNotThrow(() -> eventManager.register(new Object() {
+        assertDoesNotThrow(() -> manager.register(new Object() {
             @Handler
             @Ignore
             public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
-                context.string("B");
+                context.setString("B");
             }
         }));
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertNotEquals("B", event.context().string());
+        assertNotEquals("B", event.getContext().getString());
     }
 
     @Test
     void testIgnoreAnnotationOnIgnoredClass() {
-        EventManager eventManager = EventManager.builder().build();
+        Manager manager = Manager.builder().build();
 
         @Ignore
         final class IgnoredHandler {
+
             @Handler
             public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
-                context.string("B");
+                context.setString("B");
             }
         }
-        assertDoesNotThrow(() -> eventManager.register(new IgnoredHandler()));
+        assertDoesNotThrow(() -> manager.register(new IgnoredHandler()));
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertNotEquals("B", event.context().string());
+        assertNotEquals("B", event.getContext().getString());
     }
 
     @Test
     void testDontThrowOnHandlerMethodWithIgnoreAnnotation() {
-        EventManager eventManager = EventManager.builder().build();
-        assertDoesNotThrow(() -> eventManager.register(new Object() {
+        Manager manager = Manager.builder().build();
+        assertDoesNotThrow(() -> manager.register(new Object() {
             @Ignore
             public void handle(@NotNull StringEvent event) {
-                event.context().string("B");
+                event.getContext().setString("B");
             }
         }));
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertNotEquals("B", event.context().string());
+        assertNotEquals("B", event.getContext().getString());
     }
 
     @Test
     void testThrowOnNoHandlerMethods() {
-        EventManager eventManager = EventManager.builder().build();
-        assertThrows(PossibleMissingHandlerMethodsException.class, () -> eventManager.register(new Object()));
+        Manager manager = Manager.builder().build();
+        assertThrows(PossibleMissingHandlerMethodsException.class, () -> manager.register(new Object()));
 
         StringEvent event = new StringEvent("A");
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertEquals("A", event.context().string());
+        assertEquals("A", event.getContext().getString());
     }
 
     @Test
     void testThrowOnExceptionInHandler() {
-        EventManager eventManager = EventManager.builder().build();
-        eventManager.register(new Object() {
+        Manager manager = Manager.builder().build();
+        manager.register(new Object() {
             @Handler
             public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
                 throw EventException.from("Test Exception");
@@ -174,33 +175,33 @@ class EventManagerImplTest {
         });
 
         StringEvent event = new StringEvent("A");
-        assertThrows(EventInvocationException.class, () -> eventManager.invoke(event));
+        assertThrows(EventInvocationException.class, () -> manager.invoke(event));
 
-        assertNotEquals("B", event.context().string());
+        assertNotEquals("B", event.getContext().getString());
     }
 
     @Test
     void testThrowOnInvalidHandlerMethod() {
-        EventManager eventManager = EventManager.builder().build();
+        Manager manager = Manager.builder().build();
         StringEvent event = new StringEvent("A");
 
 
-        assertThrows(EventException.class, () -> eventManager.register(new Object() {
+        assertThrows(EventException.class, () -> manager.register(new Object() {
             @SuppressWarnings({"ParameterCanBeLocal", "UnusedAssignment", "ReassignedVariable", "AssignmentToMethodParameter"})
             @Handler
-            public void handle(@NotNull String string) {
-                string = "B";
+            public void handle(@NotNull String unusedParam) {
+                unusedParam = "B";
             }
         }));
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertNotEquals("B", event.context().string());
+        assertNotEquals("B", event.getContext().getString());
     }
 
     @Test
     void testCancelledEvent() {
-        EventManager eventManager = EventManager.builder().build();
-        eventManager.register(new Object() {
+        Manager manager = Manager.builder().build();
+        manager.register(new Object() {
             @Handler
             public void handle(@NotNull PreExecutionEvent event) {
                 event.setResult(Cancellable.Result.Cancel);
@@ -208,60 +209,83 @@ class EventManagerImplTest {
         });
 
         PreExecutionEvent event = new PreExecutionEvent();
-        eventManager.invoke(event);
+        manager.invoke(event);
 
         assertTrue(event.isCancelled());
     }
 
     @Test
     void testHandlerUnregistration() {
-        EventManager eventManager = EventManager.builder().build();
+        Manager manager = Manager.builder().build();
         StringEvent event = new StringEvent("A");
 
         final class TestHandler {
 
             @Handler
             public void handle(@NotNull StringEvent event) {
-                event.context().string("B");
+                event.getContext().setString("B");
             }
         }
 
-        eventManager.register(new TestHandler());
-        eventManager.unregister(TestHandler.class);
+        manager.register(new TestHandler());
+        manager.unregister(TestHandler.class);
 
-        eventManager.invoke(event);
+        manager.invoke(event);
 
-        assertNotEquals("B", event.context().string());
+        assertNotEquals("B", event.getContext().getString());
     }
 
-    @SuppressWarnings("SameParameterValue")
+    @Test
+    void testPrioritizedHandlers() {
+        Manager manager = Manager.create();
+
+        //noinspection AnonymousInnerClassWithTooManyMethods
+        manager.register(new Object() {
+            @Handler(event = StringEvent.class, priority = Priority.High)
+            public void handleHighPriority(StringEvent.StringEventContext context) {
+                context.setString("high");
+            }
+
+            @Handler(event = StringEvent.class, priority = Priority.Normal)
+            public void handleNormalPriority(StringEvent.StringEventContext context) {
+                context.setString("normal");
+            }
+        });
+
+        StringEvent event = new StringEvent("pre_invoke");
+        manager.invoke(event);
+
+        assertEquals("normal", event.getContext().getString());
+
+    }
+
     private static final class StringEvent implements Event {
 
         private final StringEventContext context;
 
-        private StringEvent(@NotNull String string) {
-            this.context = new StringEventContext(string);
+        private StringEvent(@NotNull String str) {
+            this.context = new StringEventContext(str);
         }
 
         @Override
-        public @NotNull StringEventContext context() {
+        public @NotNull StringEventContext getContext() {
             return this.context;
         }
 
         private static final class StringEventContext implements Context {
 
-            private @NotNull String string;
+            private @NotNull String str;
 
-            private StringEventContext(@NotNull String string) {
-                this.string = string;
+            private StringEventContext(@NotNull String str) {
+                this.str = str;
             }
 
-            @NotNull String string() {
-                return this.string;
+            @NotNull String getString() {
+                return this.str;
             }
 
-            void string(@NotNull String string) {
-                this.string = string;
+            void setString(@NotNull String str) {
+                this.str = str;
             }
         }
     }
@@ -275,7 +299,7 @@ class EventManagerImplTest {
         }
 
         @Override
-        public @NotNull Context context() {
+        public @NotNull Context getContext() {
             return this.context;
         }
 

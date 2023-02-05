@@ -2,7 +2,6 @@ package fade.inject.event;
 
 import fade.inject.Ignore;
 import fade.inject.event.exception.*;
-import fade.inject.exception.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,11 +11,11 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class EventManagerImpl implements EventManager {
+public class ManagerImpl implements Manager {
 
     private final Map<Class<? extends Event>, Map<Object, List<Method>>> handlers;
 
-    EventManagerImpl() {
+    ManagerImpl() {
         this.handlers = new HashMap<>();
     }
 
@@ -28,7 +27,7 @@ public class EventManagerImpl implements EventManager {
         int handlerMethodCount = this.registerHandlerMethodsFromHandlerObject(handler);
         if (handlerMethodCount == 0 && !handler.getClass().isAnnotationPresent(Ignore.class))
             throw PossibleMissingHandlerMethodsException.from("Handler class '%s' has zero (0) valid handler methods. This is most likely unintentional. To suppress this exception, annotate the method with fade.inject.event.@Ignore".formatted(handler.getClass()
-                                                                                                                                                                                                                                                                               .getSimpleName()));
+                                                                                                                                                                                                                                                           .getSimpleName()));
     }
 
     private int registerHandlerMethodsFromHandlerObject(@NotNull Object handler) {
@@ -145,11 +144,15 @@ public class EventManagerImpl implements EventManager {
         handlerMap.forEach((handler, methods) -> methods.stream().filter(method -> {
             Class<? extends Event> methodEventType = this.getEventTypeFromMethod(method);
             return methodEventType != null && eventType.isAssignableFrom(methodEventType);
+        }).sorted((lhs, rhs) -> {
+            Priority lhsPriority = lhs.getAnnotation(Handler.class).priority();
+            Priority rhsPriority = rhs.getAnnotation(Handler.class).priority();
+            return Integer.compare(lhsPriority.ordinal(), rhsPriority.ordinal());
         }).forEach(method -> {
             String methodSignature = method.getDeclaringClass().getName() + '#' + method.getName();
 
             Object[] parameters = Arrays.stream(method.getParameterTypes()).map(parameterType -> { // thankuu darvil <3
-                if (parameterType.isAssignableFrom(event.context().getClass())) return event.context();
+                if (parameterType.isAssignableFrom(event.getContext().getClass())) return event.getContext();
                 if (parameterType.isAssignableFrom(eventType)) return event;
                 return null;
             }).toArray();

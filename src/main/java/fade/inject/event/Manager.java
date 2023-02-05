@@ -4,14 +4,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public interface EventManager {
+public interface Manager {
 
-    static @NotNull EventManager create() {
-        return EventManager.builder().build();
+    static @NotNull Manager create() {
+        return Manager.builder().build();
     }
 
-    static @NotNull Builder builder() {
-        return EventManagerBuilderImpl.create();
+    static @NotNull Manager.ManagerBuilder builder() {
+        return ManagerBuilderImpl.create();
     }
 
     void register(@NotNull Object handler);
@@ -26,5 +26,5 @@ public interface EventManager {
 
     void invoke(@NotNull Event event);
 
-    interface Builder extends fade.inject.builder.Builder<EventManager> {}
+    interface ManagerBuilder extends fade.inject.builder.Builder<Manager> {}
 }

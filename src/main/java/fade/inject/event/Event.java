@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Event {
 
-    @NotNull Context context();
+    @NotNull Context getContext();
 
     interface Context {
     }
