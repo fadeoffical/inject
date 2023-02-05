@@ -1,4 +1,6 @@
-package fade.inject.event;
+package fade.inject;
+
+import fade.inject.event.EventManager;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,4 +15,4 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@interface Ignore {}
+public @interface Ignore {}

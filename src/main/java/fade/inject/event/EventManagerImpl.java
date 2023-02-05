@@ -1,5 +1,6 @@
 package fade.inject.event;
 
+import fade.inject.Ignore;
 import fade.inject.event.exception.*;
 import fade.inject.exception.*;
 import org.jetbrains.annotations.NotNull;

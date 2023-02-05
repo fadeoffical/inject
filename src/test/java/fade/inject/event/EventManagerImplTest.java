@@ -1,5 +1,6 @@
 package fade.inject.event;
 
+import fade.inject.Ignore;
 import fade.inject.event.exception.EventException;
 import fade.inject.event.exception.EventInvocationException;
 import fade.inject.event.exception.PossibleMissingAnnotationException;
