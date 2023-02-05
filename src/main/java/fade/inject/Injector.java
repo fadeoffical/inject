@@ -21,14 +21,5 @@ public interface Injector {
 
     <T> void inject(T obj);
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD, ElementType.PARAMETER})
-    @interface Inject {
 
-        @Retention(RetentionPolicy.RUNTIME)
-        @Target({ElementType.FIELD, ElementType.PARAMETER})
-        @interface Constructor {
-
-        }
-    }
 }
