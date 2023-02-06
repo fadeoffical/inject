@@ -35,15 +35,33 @@ public @interface Handler {
     /**
      * The handler priority.
      * <p>
-     * If the handler does not specify a priority, a {@link Priority priority} of {@link Priority.Group group}
-     * {@link Priority.Group#Normal normal} and an {@link Priority.Group#ordinal() ordinal} of {@code 0} is used. It is
-     * recommended not to set custom handler priorities unless necessary.
+     * If the handler does not specify a priority, a {@link PriorityGroup priority group} of
+     * {@link PriorityGroup#Normal normal}  is used. It is recommended not to set custom handler priorities unless
+     * necessary.
      * </p>
      *
      * @return The handler priority.
+     *
+     * @see PriorityGroup
      */
     // todo: tests
-    @NotNull Priority priority() default @Priority;
+    @NotNull PriorityGroup priorityGroup() default PriorityGroup.Normal;
+
+    /**
+     * The ordinal within a {@link PriorityGroup priority group}. Handlers with a higher priority ordinal get executed
+     * with more precedence than handlers with a lower priority ordinal.
+     * <p>
+     * If the handler does not specify an ordinal, an ordinal of {@code 0} is used. It is recommended not to set custom
+     * handler priorities unless necessary; this method should only be used when even finer control of handler priority
+     * is needed.
+     * </p>
+     * <p>
+     * Note that a handler in a higher group will still get invoked first, even if the ordinal is lower.
+     * </p>
+     *
+     * @return The ordinal.
+     */
+    int priorityOrdinal() default 0;
 
 
 }

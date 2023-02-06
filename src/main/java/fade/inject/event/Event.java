@@ -1,10 +1,10 @@
 package fade.inject.event;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface Event {
 
-    @NotNull Context getContext();
+    @Nullable Context getContext();
 
     interface Context {
     }
