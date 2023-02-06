@@ -241,12 +241,12 @@ class ManagerTest {
 
         //noinspection AnonymousInnerClassWithTooManyMethods
         manager.register(new Object() {
-            @Handler(event = StringEvent.class, priority = Priority.High)
+            @Handler(event = StringEvent.class, priority = PriorityGroup.High)
             public void handleHighPriority(StringEvent.StringEventContext context) {
                 context.setString("high");
             }
 
-            @Handler(event = StringEvent.class, priority = Priority.Normal)
+            @Handler(event = StringEvent.class, priority = PriorityGroup.Normal)
             public void handleNormalPriority(StringEvent.StringEventContext context) {
                 context.setString("normal");
             }

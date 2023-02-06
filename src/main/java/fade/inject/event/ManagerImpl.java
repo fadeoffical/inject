@@ -38,7 +38,7 @@ public class ManagerImpl implements Manager {
                 .filter(method -> !Modifier.isStatic(method.getModifiers()))
                 .filter(method -> method.canAccess(handler))
                 .map(method -> this.registerHandlerFromMethod(handler, method))
-                .map(bool -> bool ? 1 : 0)
+                .map(methodRegistered -> methodRegistered ? 1 : 0)
                 .reduce(0, Integer::sum);
     }
 
@@ -144,11 +144,7 @@ public class ManagerImpl implements Manager {
         handlerMap.forEach((handler, methods) -> methods.stream().filter(method -> {
             Class<? extends Event> methodEventType = this.getEventTypeFromMethod(method);
             return methodEventType != null && eventType.isAssignableFrom(methodEventType);
-        }).sorted((lhs, rhs) -> {
-            Priority lhsPriority = lhs.getAnnotation(Handler.class).priority();
-            Priority rhsPriority = rhs.getAnnotation(Handler.class).priority();
-            return Integer.compare(lhsPriority.ordinal(), rhsPriority.ordinal());
-        }).forEach(method -> {
+        }).sorted(ManagerImpl::sortByPriorityGroup).sorted(ManagerImpl::sortByPriorityOrdinal).forEach(method -> {
             String methodSignature = method.getDeclaringClass().getName() + '#' + method.getName();
 
             Object[] parameters = Arrays.stream(method.getParameterTypes()).map(parameterType -> { // thankuu darvil <3
@@ -167,5 +163,17 @@ public class ManagerImpl implements Manager {
                 throw EventInvocationException.from("Could not successfully '%s'; the handler threw an uncaught exception".formatted(methodSignature), exception);
             }
         }));
+    }
+
+    private static int sortByPriorityGroup(Method lhs, Method rhs) {
+        Priority.Group lhsPriorityGroup = lhs.getAnnotation(Handler.class).priority().group();
+        Priority.Group rhsPriorityGroup = rhs.getAnnotation(Handler.class).priority().group();
+        return Integer.compare(lhsPriorityGroup.ordinal(), rhsPriorityGroup.ordinal());
+    }
+
+    private static int sortByPriorityOrdinal(Method lhs, Method rhs) {
+        int lhsPriorityOrdinal = lhs.getAnnotation(Handler.class).priority().ordinal();
+        int rhsPriorityOrdinal = rhs.getAnnotation(Handler.class).priority().ordinal();
+        return Integer.compare(rhsPriorityOrdinal, lhsPriorityOrdinal);
     }
 }
