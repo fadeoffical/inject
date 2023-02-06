@@ -1,6 +1,6 @@
 package fade.inject.event;
 
-import fade.inject.event.events.StringEvent;
+import fade.inject.event.events.MockEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,18 +15,18 @@ class PriorityTest {
 
         // noinspection AnonymousInnerClassWithTooManyMethods
         manager.register(new Object() {
-            @Handler(event = StringEvent.class, priorityOrdinal = 10)
-            public void handleHighPriority(StringEvent.StringEventContext context) {
+            @Handler(event = MockEvent.class, priorityOrdinal = 10)
+            public void handleHighPriority(MockEvent.Context context) {
                 context.setString("lower ordinal");
             }
 
-            @Handler(event = StringEvent.class, priorityOrdinal = 12)
-            public void handleNormalPriority(StringEvent.StringEventContext context) {
+            @Handler(event = MockEvent.class, priorityOrdinal = 12)
+            public void handleNormalPriority(MockEvent.Context context) {
                 context.setString("higher ordinal");
             }
         });
 
-        StringEvent event = new StringEvent("pre_invoke");
+        MockEvent event = MockEvent.from("pre_invoke");
         manager.invoke(event);
 
         assertEquals("higher ordinal", event.getContext().getString());
@@ -39,21 +39,20 @@ class PriorityTest {
 
         // noinspection AnonymousInnerClassWithTooManyMethods
         manager.register(new Object() {
-            @Handler(event = StringEvent.class, priorityGroup = PriorityGroup.High)
-            public void handleHighPriority(StringEvent.StringEventContext context) {
+            @Handler(event = MockEvent.class, priorityGroup = PriorityGroup.High)
+            public void handleHighPriority(MockEvent.Context context) {
                 context.setString("high");
             }
 
-            @Handler(event = StringEvent.class, priorityGroup = PriorityGroup.Normal)
-            public void handleNormalPriority(StringEvent.StringEventContext context) {
+            @Handler(event = MockEvent.class, priorityGroup = PriorityGroup.Normal)
+            public void handleNormalPriority(MockEvent.Context context) {
                 context.setString("normal");
             }
         });
 
-        StringEvent event = new StringEvent("pre_invoke");
+        MockEvent event = MockEvent.from("pre_invoke");
         manager.invoke(event);
 
         assertEquals("normal", event.getContext().getString());
-
     }
 }

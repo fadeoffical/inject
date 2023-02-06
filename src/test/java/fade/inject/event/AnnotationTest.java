@@ -1,8 +1,7 @@
-package fade.inject.event.events;
+package fade.inject.event;
 
 import fade.inject.Ignore;
-import fade.inject.event.Handler;
-import fade.inject.event.Manager;
+import fade.inject.event.events.MockEvent;
 import fade.inject.event.exception.PossibleMissingAnnotationException;
 import fade.inject.event.exception.PossibleMissingHandlerMethodsException;
 import org.jetbrains.annotations.NotNull;
@@ -19,12 +18,12 @@ class AnnotationTest {
         Manager manager = Manager.builder().build();
         assertThrows(PossibleMissingAnnotationException.class, () -> manager.register(new Object() {
             @SuppressWarnings("unused") // intentional
-            public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
+            public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 context.setString("B");
             }
         }));
 
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
         assertNotEquals("B", event.getContext().getString());
@@ -38,17 +37,17 @@ class AnnotationTest {
         // noinspection AnonymousInnerClassWithTooManyMethods
         assertDoesNotThrow(() -> manager.register(new Object() {
             @Ignore
-            public void handle(@NotNull StringEvent event) {
+            public void handle(@NotNull MockEvent event) {
                 event.getContext().setString("C");
             }
 
             @Handler
-            public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
+            public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 context.setString("B");
             }
         }));
 
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
         assertEquals("B", event.getContext().getString());
@@ -62,12 +61,12 @@ class AnnotationTest {
         assertDoesNotThrow(() -> manager.register(new Object() {
             @Handler
             @Ignore
-            public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
+            public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 context.setString("B");
             }
         }));
 
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
         assertNotEquals("B", event.getContext().getString());
@@ -82,13 +81,13 @@ class AnnotationTest {
         final class IgnoredHandler {
 
             @Handler
-            public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
+            public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 context.setString("B");
             }
         }
         assertDoesNotThrow(() -> manager.register(new IgnoredHandler()));
 
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
         assertNotEquals("B", event.getContext().getString());
@@ -100,12 +99,12 @@ class AnnotationTest {
         Manager manager = Manager.builder().build();
         assertDoesNotThrow(() -> manager.register(new Object() {
             @Ignore
-            public void handle(@NotNull StringEvent event) {
+            public void handle(@NotNull MockEvent event) {
                 event.getContext().setString("B");
             }
         }));
 
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
         assertNotEquals("B", event.getContext().getString());
@@ -117,7 +116,7 @@ class AnnotationTest {
         Manager manager = Manager.builder().build();
         assertThrows(PossibleMissingHandlerMethodsException.class, () -> manager.register(new Object()));
 
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
         assertEquals("A", event.getContext().getString());

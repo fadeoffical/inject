@@ -2,7 +2,7 @@ package fade.inject.event;
 
 import org.jetbrains.annotations.NotNull;
 
-public abstract class CancellableEvent implements Event, Cancellable {
+public abstract class CancellableEvent extends Event implements Cancellable {
 
     private @NotNull Result result = Result.Pass;
 

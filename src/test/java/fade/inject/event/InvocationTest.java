@@ -1,7 +1,6 @@
 package fade.inject.event;
 
-import fade.inject.event.events.PreExecutionEvent;
-import fade.inject.event.events.StringEvent;
+import fade.inject.event.events.MockEvent;
 import fade.inject.event.exception.EventException;
 import fade.inject.event.exception.EventInvocationException;
 import org.jetbrains.annotations.NotNull;
@@ -18,12 +17,12 @@ class InvocationTest {
         Manager manager = Manager.builder().build();
         manager.register(new Object() {
             @Handler
-            public void handle(@NotNull StringEvent event) {
+            public void handle(@NotNull MockEvent event) {
                 event.getContext().setString("updated");
             }
         });
 
-        StringEvent event = new StringEvent("initial");
+        MockEvent event = MockEvent.from("initial");
         manager.invoke(event);
 
         assertEquals("updated", event.getContext().getString());
@@ -34,16 +33,16 @@ class InvocationTest {
     void testSimpleHandlerInvocationWithAnnotationEventTypeFromAnnotation() {
         Manager manager = Manager.builder().build();
         manager.register(new Object() {
-            @Handler(event = StringEvent.class)
-            public void handle(@NotNull StringEvent.StringEventContext context) {
+            @Handler(event = MockEvent.class)
+            public void handle(@NotNull MockEvent.Context context) {
                 context.setString("updated");
+                assertTrue(context.returnTrue());
+                assertFalse(context.returnFalse());
             }
         });
 
-        StringEvent event = new StringEvent("initial");
+        MockEvent event = MockEvent.from("initial");
         manager.invoke(event);
-
-        assertEquals("updated", event.getContext().getString());
     }
 
     @Test
@@ -52,12 +51,12 @@ class InvocationTest {
         Manager manager = Manager.builder().build();
         manager.register(new Object() {
             @Handler
-            public void handle(@NotNull PreExecutionEvent event) {
+            public void handle(@NotNull MockEvent event) {
                 event.setResult(Cancellable.Result.Cancel);
             }
         });
 
-        PreExecutionEvent event = new PreExecutionEvent();
+        MockEvent event = MockEvent.from();
         manager.invoke(event);
 
         assertTrue(event.isCancelled());
@@ -69,12 +68,12 @@ class InvocationTest {
         Manager manager = Manager.builder().build();
         manager.register(new Object() {
             @Handler
-            public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
+            public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 context.setString("B");
             }
         });
 
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
         assertEquals("B", event.getContext().getString());
@@ -84,12 +83,12 @@ class InvocationTest {
     @DisplayName("simple handler unregistration")
     void testSimpleHandlerUnregistration() {
         Manager manager = Manager.builder().build();
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
 
         final class TestHandler {
 
             @Handler
-            public void handle(@NotNull StringEvent event) {
+            public void handle(@NotNull MockEvent event) {
                 event.getContext().setString("B");
             }
         }
@@ -108,12 +107,12 @@ class InvocationTest {
         Manager manager = Manager.builder().build();
         manager.register(new Object() {
             @Handler
-            public void handle(@NotNull StringEvent event, @NotNull StringEvent.StringEventContext context) {
+            public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 throw EventException.from("Test Exception");
             }
         });
 
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
         assertThrows(EventInvocationException.class, () -> manager.invoke(event));
 
         assertNotEquals("B", event.getContext().getString());
@@ -123,7 +122,7 @@ class InvocationTest {
     @DisplayName("throw if annotated method is not a valid handler method")
     void testThrowIfAnnotatedMethodIsNotAValidHandlerMethod() {
         Manager manager = Manager.builder().build();
-        StringEvent event = new StringEvent("A");
+        MockEvent event = MockEvent.from("A");
 
         assertThrows(EventException.class, () -> manager.register(new Object() {
             @SuppressWarnings({"ParameterCanBeLocal", "UnusedAssignment", "ReassignedVariable", "AssignmentToMethodParameter"})
