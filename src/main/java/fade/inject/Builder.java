@@ -1,4 +1,4 @@
-package fade.inject.builder;
+package fade.inject;
 
 import org.jetbrains.annotations.NotNull;
 

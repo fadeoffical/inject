@@ -1,6 +1,7 @@
-package fade.inject.event.exception;
+package fade.inject.exception.event;
 
 
+import fade.inject.exception.InjectException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,8 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * thrown on a specific error case, an exception with a more fitting name should be created and extend this class.
  * </p>
  */
-public class EventException extends RuntimeException {
-
+public class EventException extends InjectException {
 
     /**
      * The internal constructor for the exception. This constructor should not be used except when creating a new event

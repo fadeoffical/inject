@@ -1,4 +1,4 @@
-package fade.inject.event.exception;
+package fade.inject.exception.event;
 
 public final class PossibleMissingAnnotationException extends RuntimeException {
 

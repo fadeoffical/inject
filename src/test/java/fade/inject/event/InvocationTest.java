@@ -1,8 +1,8 @@
 package fade.inject.event;
 
 import fade.inject.event.events.MockEvent;
-import fade.inject.event.exception.EventException;
-import fade.inject.event.exception.EventInvocationException;
+import fade.inject.exception.event.EventException;
+import fade.inject.exception.event.EventInvocationException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

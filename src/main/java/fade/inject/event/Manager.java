@@ -1,5 +1,6 @@
 package fade.inject.event;
 
+import fade.inject.Builder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -26,5 +27,5 @@ public interface Manager {
 
     void invoke(@NotNull Event event);
 
-    interface ManagerBuilder extends fade.inject.builder.Builder<Manager> {}
+    interface ManagerBuilder extends Builder<Manager> {}
 }
