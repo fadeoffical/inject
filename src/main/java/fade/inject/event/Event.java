@@ -1,5 +1,6 @@
 package fade.inject.event;
 
-public abstract class Event {
-
-}
+/**
+ * A superclass for events. This class currently servers no purpose major, except marking classes as events.
+ */
+public abstract class Event {}
