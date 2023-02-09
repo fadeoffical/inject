@@ -84,10 +84,9 @@ public final class InjectorImpl implements Injector {
     private static @NotNull List<Field> getFieldsFromObject(@NotNull Object object) {
         Class<?> type = object.getClass();
         return Arrays.stream(type.getDeclaredFields())
+                .filter(field -> field.canAccess(object) || field.trySetAccessible())
                 .filter(field -> field.isAnnotationPresent(Inject.class))
                 .filter(field -> {
-                    if (!field.canAccess(object))
-                        field.setAccessible(true);
 
                     try {
                         return field.get(object) == null;
