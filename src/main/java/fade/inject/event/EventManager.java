@@ -5,6 +5,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * An event manager is a class that holds a reference to all handler methods. It can register handlers and invoke them
+ * by calling the {@link EventManager#invoke(Event)} method.
+ *
+
+ */
 public interface EventManager {
 
     static @NotNull EventManager create() {

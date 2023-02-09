@@ -3,15 +3,13 @@ package fade.inject.event;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Marks an event as be cancellable.
- * <p>
- * A cancelled event is an indication by at least one handler, that it requested to cancel the execution of the subject
- * code, which is dependent on this event, without another, less prioritized handler setting the result to continue.
- * </p>
- * <p>
- * Note that the actual effect that an event result has, is entirely dependent on the implementation of the event
- * invoker.
- * </p>
+ * <h1>Cancellable</h1>
+ * <p>A cancellable event is an event, which contains a {@link Result result} property.</p
+ * <p>An event with a result of cancelled is an indication by at least one handler, that it requested to cancel the
+ * execution of the subject procedure, which is dependent on this event, without another, less prioritized handler
+ * setting the result to continue.</p>
+ * <p>Note that the actual effect that an event result has, is entirely dependent on the implementation of the event
+ * invoker.</p>
  */
 public interface Cancellable {
 
