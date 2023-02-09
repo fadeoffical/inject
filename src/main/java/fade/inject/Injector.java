@@ -2,6 +2,7 @@ package fade.inject;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.util.List;
 import java.util.Set;
@@ -25,6 +26,8 @@ public interface Injector {
      * @return The constructed and injected object.
      */
     <T> @NotNull T construct(Class<? extends T> cls);
+
+    <T> @NotNull T construct(Class<? extends T> cls, @Range(from = -1, to = 65535 ) int ordinal);
 
     void inject(@NotNull Object object);
 

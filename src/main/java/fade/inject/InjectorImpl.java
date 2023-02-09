@@ -6,6 +6,7 @@ import fade.inject.exception.InvalidConstructorException;
 import fade.inject.exception.MissingConstructorException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.lang.ref.Reference;
 import java.lang.reflect.Constructor;
@@ -19,6 +20,8 @@ import java.util.Set;
 
 public final class InjectorImpl implements Injector {
 
+    private static final int UNSPECIFIED_ORDINAL = -1;
+
     private final @NotNull Set<DependencyResolver> resolvers;
 
     InjectorImpl(@NotNull InjectorBuilder builder) {
@@ -27,7 +30,12 @@ public final class InjectorImpl implements Injector {
 
     @Override
     public <T> @NotNull T construct(@NotNull Class<? extends T> cls) {
-        Constructor<?> constructor = getConstructorFromClass(cls);
+        return this.construct(cls, InjectorImpl.UNSPECIFIED_ORDINAL);
+    }
+
+    @Override
+    public <T> @NotNull T construct(Class<? extends T> cls, @Range(from = -1, to = 65535) int ordinal) {
+        Constructor<?> constructor = getConstructorFromClass(cls, ordinal);
         Object[] arguments = this.populateConstructor(constructor);
 
         try {
@@ -97,15 +105,22 @@ public final class InjectorImpl implements Injector {
                 .toList();
     }
 
-    private static @NotNull Constructor<?> getConstructorFromClass(@NotNull Class<?> cls) {
+    private static @NotNull Constructor<?> getConstructorFromClass(@NotNull Class<?> cls, int ordinal) {
         Constructor<?>[] constructors = cls.getConstructors();
         if (constructors.length == 0)
             throw MissingConstructorException.from("Class '%s' has no constructors".formatted(cls.getName()));
 
+        if (ordinal != -1) {
+            Constructor<?> constructor = constructors[ordinal];
+            if (!isConstructorValid(constructor))
+                throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
+            return constructor;
+        }
+
         Inject inject = cls.getAnnotation(Inject.class);
         if (inject != null) {
-            int ordinal = inject.ordinal();
-            Constructor<?> constructor = constructors[ordinal];
+            int injectOrdinal = inject.ordinal();
+            Constructor<?> constructor = constructors[injectOrdinal];
             if (!isConstructorValid(constructor))
                 throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
             return constructor;
