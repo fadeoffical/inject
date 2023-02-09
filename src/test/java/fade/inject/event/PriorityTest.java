@@ -39,12 +39,12 @@ class PriorityTest {
 
         // noinspection AnonymousInnerClassWithTooManyMethods
         manager.register(new Object() {
-            @Handler(event = MockEvent.class, priorityGroup = PriorityGroup.High)
+            @Handler(event = MockEvent.class, group = PriorityGroup.High)
             public void handleHighPriority(MockEvent.Context context) {
                 context.setString("high");
             }
 
-            @Handler(event = MockEvent.class, priorityGroup = PriorityGroup.Normal)
+            @Handler(event = MockEvent.class, group = PriorityGroup.Normal)
             public void handleNormalPriority(MockEvent.Context context) {
                 context.setString("normal");
             }

@@ -44,8 +44,7 @@ public @interface Handler {
      *
      * @see PriorityGroup
      */
-    // todo: tests
-    @NotNull PriorityGroup priorityGroup() default PriorityGroup.Normal;
+    @NotNull PriorityGroup group() default PriorityGroup.Normal;
 
     /**
      * The ordinal within a {@link PriorityGroup priority group}. Handlers with a higher priority ordinal get executed
@@ -61,7 +60,7 @@ public @interface Handler {
      *
      * @return The ordinal.
      */
-    int priorityOrdinal() default 0;
+    int ordinal() default 0;
 
 
 }

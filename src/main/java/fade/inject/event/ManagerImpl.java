@@ -170,14 +170,14 @@ public class ManagerImpl implements Manager {
     }
 
     private static int sortByPriorityGroup(Method lhs, Method rhs) {
-        PriorityGroup lhsPriorityGroup = lhs.getAnnotation(Handler.class).priorityGroup();
-        PriorityGroup rhsPriorityGroup = rhs.getAnnotation(Handler.class).priorityGroup();
+        PriorityGroup lhsPriorityGroup = lhs.getAnnotation(Handler.class).group();
+        PriorityGroup rhsPriorityGroup = rhs.getAnnotation(Handler.class).group();
         return Integer.compare(lhsPriorityGroup.ordinal(), rhsPriorityGroup.ordinal());
     }
 
     private static int sortByPriorityOrdinal(Method lhs, Method rhs) {
-        int lhsPriorityOrdinal = lhs.getAnnotation(Handler.class).priorityOrdinal();
-        int rhsPriorityOrdinal = rhs.getAnnotation(Handler.class).priorityOrdinal();
+        int lhsPriorityOrdinal = lhs.getAnnotation(Handler.class).ordinal();
+        int rhsPriorityOrdinal = rhs.getAnnotation(Handler.class).ordinal();
         return Integer.compare(lhsPriorityOrdinal, rhsPriorityOrdinal);
     }
 }
