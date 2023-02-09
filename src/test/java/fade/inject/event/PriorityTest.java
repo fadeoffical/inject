@@ -11,10 +11,10 @@ class PriorityTest {
     @Test
     @DisplayName("prioritized handlers with ordinal")
     void testPrioritizedHandlersWithOrdinal() {
-        Manager manager = Manager.create();
+        EventManager eventManager = EventManager.create();
 
         // noinspection AnonymousInnerClassWithTooManyMethods
-        manager.register(new Object() {
+        eventManager.register(new Object() {
             @Handler(event = MockEvent.class, ordinal = 10)
             public void handleHighPriority(MockEvent.Context context) {
                 context.setString("lower ordinal");
@@ -27,7 +27,7 @@ class PriorityTest {
         });
 
         MockEvent event = MockEvent.from("pre_invoke");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertEquals("higher ordinal", event.getContext().get().getString());
     }
@@ -35,10 +35,10 @@ class PriorityTest {
     @Test
     @DisplayName("prioritized handlers with group")
     void testPrioritizedHandlersWithGroup() {
-        Manager manager = Manager.create();
+        EventManager eventManager = EventManager.create();
 
         // noinspection AnonymousInnerClassWithTooManyMethods
-        manager.register(new Object() {
+        eventManager.register(new Object() {
             @Handler(event = MockEvent.class, group = PriorityGroup.High)
             public void handleHighPriority(MockEvent.Context context) {
                 context.setString("high");
@@ -51,7 +51,7 @@ class PriorityTest {
         });
 
         MockEvent event = MockEvent.from("pre_invoke");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertEquals("normal", event.getContext().get().getString());
     }

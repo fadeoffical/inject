@@ -2,7 +2,7 @@ package fade.inject.event;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class ManagerBuilderImpl implements Manager.ManagerBuilder {
+public final class ManagerBuilderImpl implements EventManager.ManagerBuilder {
 
     private ManagerBuilderImpl() {}
 
@@ -11,7 +11,7 @@ public final class ManagerBuilderImpl implements Manager.ManagerBuilder {
     }
 
     @Override
-    public @NotNull Manager build() {
-        return new ManagerImpl();
+    public @NotNull EventManager build() {
+        return new EventManagerImpl();
     }
 }

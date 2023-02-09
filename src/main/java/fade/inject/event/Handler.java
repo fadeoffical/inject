@@ -28,7 +28,7 @@ public @interface Handler {
      *
      * @return The handler type.
      *
-     * @see Manager#register(Object)
+     * @see EventManager#register(Object)
      */
     @NotNull Class<? extends Event> event() default Event.class;
 

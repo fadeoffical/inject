@@ -14,8 +14,8 @@ class InvocationTest {
     @Test
     @DisplayName("simple handler invocation with event type from parameter")
     void testSimpleHandlerInvocationWithEventTypeFromParameter() {
-        Manager manager = Manager.builder().build();
-        manager.register(new Object() {
+        EventManager eventManager = EventManager.builder().build();
+        eventManager.register(new Object() {
             @Handler
             public void handle(@NotNull MockEvent event) {
                 event.getContext().get().setString("updated");
@@ -23,7 +23,7 @@ class InvocationTest {
         });
 
         MockEvent event = MockEvent.from("initial");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertEquals("updated", event.getContext().get().getString());
     }
@@ -31,8 +31,8 @@ class InvocationTest {
     @Test
     @DisplayName("simple handler invocation with event type from annotation")
     void testSimpleHandlerInvocationWithAnnotationEventTypeFromAnnotation() {
-        Manager manager = Manager.builder().build();
-        manager.register(new Object() {
+        EventManager eventManager = EventManager.builder().build();
+        eventManager.register(new Object() {
             @Handler(event = MockEvent.class)
             public void handle(@NotNull MockEvent.Context context) {
                 context.setString("updated");
@@ -42,14 +42,14 @@ class InvocationTest {
         });
 
         MockEvent event = MockEvent.from("initial");
-        manager.invoke(event);
+        eventManager.invoke(event);
     }
 
     @Test
     @DisplayName("simple handler with cancellable event")
     void testSimpleHandlerWithCancellableEvent() {
-        Manager manager = Manager.builder().build();
-        manager.register(new Object() {
+        EventManager eventManager = EventManager.builder().build();
+        eventManager.register(new Object() {
             @Handler
             public void handle(@NotNull MockEvent event) {
                 event.setResult(Cancellable.Result.Cancel);
@@ -57,7 +57,7 @@ class InvocationTest {
         });
 
         MockEvent event = MockEvent.from();
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertTrue(event.isCancelled());
     }
@@ -65,8 +65,8 @@ class InvocationTest {
     @Test
     @DisplayName("simple handler invocation with context parameter")
     void testSimpleHandlerInvocationWithContextParameter() {
-        Manager manager = Manager.builder().build();
-        manager.register(new Object() {
+        EventManager eventManager = EventManager.builder().build();
+        eventManager.register(new Object() {
             @Handler
             public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 context.setString("B");
@@ -74,7 +74,7 @@ class InvocationTest {
         });
 
         MockEvent event = MockEvent.from("A");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertEquals("B", event.getContext().get().getString());
     }
@@ -82,7 +82,7 @@ class InvocationTest {
     @Test
     @DisplayName("simple handler unregistration")
     void testSimpleHandlerUnregistration() {
-        Manager manager = Manager.builder().build();
+        EventManager eventManager = EventManager.builder().build();
         MockEvent event = MockEvent.from("A");
 
         final class TestHandler {
@@ -93,10 +93,10 @@ class InvocationTest {
             }
         }
 
-        manager.register(new TestHandler());
-        manager.unregister(TestHandler.class);
+        eventManager.register(new TestHandler());
+        eventManager.unregister(TestHandler.class);
 
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertNotEquals("B", event.getContext().get().getString());
     }
@@ -104,8 +104,8 @@ class InvocationTest {
     @Test
     @DisplayName("throw if exception occurs in handler")
     void testThrowIfExceptionOccursInHandler() {
-        Manager manager = Manager.builder().build();
-        manager.register(new Object() {
+        EventManager eventManager = EventManager.builder().build();
+        eventManager.register(new Object() {
             @Handler
             public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 throw EventException.from("Test Exception");
@@ -113,7 +113,7 @@ class InvocationTest {
         });
 
         MockEvent event = MockEvent.from("A");
-        assertThrows(EventInvocationException.class, () -> manager.invoke(event));
+        assertThrows(EventInvocationException.class, () -> eventManager.invoke(event));
 
         assertNotEquals("B", event.getContext().get().getString());
     }
@@ -121,14 +121,14 @@ class InvocationTest {
     @Test
     @DisplayName("throw if annotated method is not a valid handler method")
     void testThrowIfAnnotatedMethodIsNotAValidHandlerMethod() {
-        Manager manager = Manager.builder().build();
+        EventManager eventManager = EventManager.builder().build();
         MockEvent event = MockEvent.from("A");
 
-        assertThrows(EventException.class, () -> manager.register(new Object() {
+        assertThrows(EventException.class, () -> eventManager.register(new Object() {
             @Handler
             public void handle() {}
         }));
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertNotEquals("B", event.getContext().get().getString());
     }

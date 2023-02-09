@@ -15,8 +15,8 @@ class AnnotationTest {
     @Test
     @DisplayName("throw if handler class has no methods")
     void testThrowIfHandlerClassHasNoMethods() {
-        Manager manager = Manager.builder().build();
-        assertThrows(PossibleMissingAnnotationException.class, () -> manager.register(new Object() {
+        EventManager eventManager = EventManager.builder().build();
+        assertThrows(PossibleMissingAnnotationException.class, () -> eventManager.register(new Object() {
             @SuppressWarnings("unused") // intentional
             public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
                 context.setString("B");
@@ -24,7 +24,7 @@ class AnnotationTest {
         }));
 
         MockEvent event = MockEvent.from("A");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertNotEquals("B", event.getContext().get().getString());
     }
@@ -32,10 +32,10 @@ class AnnotationTest {
     @Test
     @DisplayName("do not throw if handler is ignored")
     void testDoNotThrowIfHandlerIsIgnored() {
-        Manager manager = Manager.builder().build();
+        EventManager eventManager = EventManager.builder().build();
 
         // noinspection AnonymousInnerClassWithTooManyMethods
-        assertDoesNotThrow(() -> manager.register(new Object() {
+        assertDoesNotThrow(() -> eventManager.register(new Object() {
             @Ignore
             public void handle(@NotNull MockEvent event) {
                 event.getContext().get().setString("C");
@@ -48,7 +48,7 @@ class AnnotationTest {
         }));
 
         MockEvent event = MockEvent.from("A");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertEquals("B", event.getContext().get().getString());
     }
@@ -56,9 +56,9 @@ class AnnotationTest {
     @Test
     @DisplayName("do not throw if handler class has only ignored handlers")
     void testDoNotThrowIfHandlerClassHasOnlyIgnoredHandlers() {
-        Manager manager = Manager.builder().build();
+        EventManager eventManager = EventManager.builder().build();
 
-        assertDoesNotThrow(() -> manager.register(new Object() {
+        assertDoesNotThrow(() -> eventManager.register(new Object() {
             @Handler
             @Ignore
             public void handle(@NotNull MockEvent event, @NotNull MockEvent.Context context) {
@@ -67,7 +67,7 @@ class AnnotationTest {
         }));
 
         MockEvent event = MockEvent.from("A");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertNotEquals("B", event.getContext().get().getString());
     }
@@ -75,7 +75,7 @@ class AnnotationTest {
     @Test
     @DisplayName("do not register handlers of ignored handler class")
     void testDoNotRegisterHandlersOfIgnoredHandlerClass() {
-        Manager manager = Manager.builder().build();
+        EventManager eventManager = EventManager.builder().build();
 
         @Ignore
         final class IgnoredHandler {
@@ -85,10 +85,10 @@ class AnnotationTest {
                 context.setString("B");
             }
         }
-        assertDoesNotThrow(() -> manager.register(new IgnoredHandler()));
+        assertDoesNotThrow(() -> eventManager.register(new IgnoredHandler()));
 
         MockEvent event = MockEvent.from("A");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertNotEquals("B", event.getContext().get().getString());
     }
@@ -96,8 +96,8 @@ class AnnotationTest {
     @Test
     @DisplayName("do not throw if handler class has only ignored handler-like methods")
     void testDoNotThrowIfHandlerClassHasOnlyIgnoredHandlerLikeMethods() {
-        Manager manager = Manager.builder().build();
-        assertDoesNotThrow(() -> manager.register(new Object() {
+        EventManager eventManager = EventManager.builder().build();
+        assertDoesNotThrow(() -> eventManager.register(new Object() {
             @Ignore
             public void handle(@NotNull MockEvent event) {
                 event.getContext().get().setString("B");
@@ -105,7 +105,7 @@ class AnnotationTest {
         }));
 
         MockEvent event = MockEvent.from("A");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertNotEquals("B", event.getContext().get().getString());
     }
@@ -113,11 +113,11 @@ class AnnotationTest {
     @Test
     @DisplayName("throw if handler class has no handler methods")
     void testThrowIfHandlerClassHasNoHandlerMethods() {
-        Manager manager = Manager.builder().build();
-        assertThrows(PossibleMissingHandlerMethodsException.class, () -> manager.register(new Object()));
+        EventManager eventManager = EventManager.builder().build();
+        assertThrows(PossibleMissingHandlerMethodsException.class, () -> eventManager.register(new Object()));
 
         MockEvent event = MockEvent.from("A");
-        manager.invoke(event);
+        eventManager.invoke(event);
 
         assertEquals("A", event.getContext().get().getString());
     }

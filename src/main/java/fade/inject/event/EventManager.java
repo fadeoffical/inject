@@ -5,13 +5,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public interface Manager {
+public interface EventManager {
 
-    static @NotNull Manager create() {
-        return Manager.builder().build();
+    static @NotNull EventManager create() {
+        return EventManager.builder().build();
     }
 
-    static @NotNull Manager.ManagerBuilder builder() {
+    static @NotNull EventManager.ManagerBuilder builder() {
         return ManagerBuilderImpl.create();
     }
 
@@ -27,5 +27,5 @@ public interface Manager {
 
     void invoke(@NotNull Event event);
 
-    sealed interface ManagerBuilder extends Builder<Manager> permits ManagerBuilderImpl {}
+    sealed interface ManagerBuilder extends Builder<EventManager> permits ManagerBuilderImpl {}
 }

@@ -11,11 +11,11 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class ManagerImpl implements Manager {
+public class EventManagerImpl implements EventManager {
 
     private final Map<Class<? extends Event>, Map<Object, List<Method>>> handlers;
 
-    ManagerImpl() {
+    EventManagerImpl() {
         this.handlers = new HashMap<>();
     }
 
@@ -144,7 +144,7 @@ public class ManagerImpl implements Manager {
         handlerMap.forEach((handler, methods) -> methods.stream().filter(method -> {
             Class<? extends Event> methodEventType = this.getEventTypeFromMethod(method);
             return methodEventType != null && eventType.isAssignableFrom(methodEventType);
-        }).sorted(ManagerImpl::sortByPriorityGroup).sorted(ManagerImpl::sortByPriorityOrdinal).forEach(method -> {
+        }).sorted(EventManagerImpl::sortByPriorityGroup).sorted(EventManagerImpl::sortByPriorityOrdinal).forEach(method -> {
             String methodSignature = method.getDeclaringClass().getName() + '#' + method.getName();
 
             Object[] parameters = Arrays.stream(method.getParameterTypes()).map(parameterType -> { // thankuu darvil <3
