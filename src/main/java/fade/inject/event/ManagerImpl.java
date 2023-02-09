@@ -149,8 +149,11 @@ public class ManagerImpl implements Manager {
 
             Object[] parameters = Arrays.stream(method.getParameterTypes()).map(parameterType -> { // thankuu darvil <3
                 if (event instanceof Contextual<?> contextual) {
-                    Object context = contextual.getContext();
-                    if (context != null && parameterType.isAssignableFrom(context.getClass())) return context;
+                    Optional<?> contextWrapper = contextual.getContext();
+                    if (contextWrapper.isPresent()) {
+                        Object context = contextWrapper.get();
+                        if (parameterType.isAssignableFrom(context.getClass())) return context;
+                    }
                 }
 
                 if (parameterType.isAssignableFrom(eventType)) return event;
