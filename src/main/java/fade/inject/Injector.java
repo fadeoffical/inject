@@ -5,9 +5,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.Set;
 
 public interface Injector {
+
+    static @NotNull Injector create() {
+        return Injector.builder().build();
+    }
+
+    static @NotNull InjectorBuilder builder() {
+        return InjectorBuilderImpl.create();
+    }
 
     /**
      * Constructs an object from the {@code cls}, injects the object with its dependencies and returns it.
@@ -17,7 +25,7 @@ public interface Injector {
      *
      * @return The constructed and injected object.
      */
-    <T> T construct(Class<? extends T> cls) throws InvocationTargetException, InstantiationException, IllegalAccessException;
+    <T> @NotNull T construct(Class<? extends T> cls) throws InvocationTargetException, InstantiationException, IllegalAccessException;
 
     void inject(@NotNull Object object);
 
@@ -27,4 +35,11 @@ public interface Injector {
 
     @NotNull List<?> resolveDependencies(@NotNull Class<?> type);
 
+    sealed interface InjectorBuilder extends Builder<Injector> permits InjectorBuilderImpl {
+
+        @NotNull InjectorBuilder withResolver(@NotNull DependencyResolver resolver);
+
+        @NotNull Set<DependencyResolver> getResolvers();
+
+    }
 }

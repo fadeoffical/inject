@@ -17,12 +17,12 @@ public final class InjectorImpl implements Injector {
 
     private final @NotNull Set<DependencyResolver> resolvers;
 
-    InjectorImpl() {
-        this.resolvers = new HashSet<>();
+    InjectorImpl(@NotNull InjectorBuilder builder) {
+        this.resolvers = builder.getResolvers();
     }
 
     @Override
-    public <T> T construct(@NotNull Class<? extends T> cls) {
+    public <T> @NotNull T construct(@NotNull Class<? extends T> cls) {
         Constructor<?> constructor = getConstructorFromClass(cls);
         Object[] arguments = this.populateConstructor(constructor);
 

@@ -27,5 +27,5 @@ public interface Manager {
 
     void invoke(@NotNull Event event);
 
-    interface ManagerBuilder extends Builder<Manager> {}
+    sealed interface ManagerBuilder extends Builder<Manager> permits ManagerBuilderImpl {}
 }
