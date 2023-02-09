@@ -23,7 +23,7 @@ public final class InjectorImpl implements Injector {
 
     @Override
     public <T> T construct(@NotNull Class<? extends T> cls) {
-        Constructor<?> constructor = this.getConstructorFromClass(cls);
+        Constructor<?> constructor = getConstructorFromClass(cls);
         Object[] arguments = this.populateConstructor(constructor);
 
         try {
@@ -36,12 +36,23 @@ public final class InjectorImpl implements Injector {
 
     @Override
     public void inject(@NotNull Object object) {
-        Class<?> cls = object.getClass();
+        Class<?> type = object.getClass();
 
-        Field[] fields = cls.getFields();
-        if (fields.length == 0) {}
+        List<Field> fields = getFieldsFromObject(object);
+        fields.forEach(field -> {
+            Inject inject = field.getAnnotation(Inject.class);
+            List<?> dependencies = this.resolveDependencies(type);
+            if (inject.necessity() == Necessity.Required && dependencies.isEmpty())
+                throw MissingConstructorException.from("Required dependency '%s' in class '%s' could not be resolved".formatted(field.getName(), type.getName()));
 
+            Object dependency = dependencies.get(0);
 
+            try {
+                field.set(object, dependency);
+            } catch (IllegalAccessException e) {
+                throw InjectException.from("Could not inject value for '%s' into class '%s'".formatted(field.getName(), type.getName()), e);
+            }
+        });
     }
 
     @Override
@@ -65,7 +76,22 @@ public final class InjectorImpl implements Injector {
                 .toList();
     }
 
-    private @NotNull Constructor<?> getConstructorFromClass(@NotNull Class<?> cls) {
+    private static @NotNull List<Field> getFieldsFromObject(@NotNull Object object) {
+        Class<?> type = object.getClass();
+        return Arrays.stream(type.getDeclaredFields())
+                .filter(field -> field.canAccess(object))
+                .filter(field -> field.isAnnotationPresent(Inject.class))
+                .filter(field -> {
+                    try {
+                        return field.get(object) != null;
+                    } catch (IllegalAccessException exception) {
+                        throw InjectException.from("Could not check if field was already injected", exception);
+                    }
+                })
+                .toList();
+    }
+
+    private static @NotNull Constructor<?> getConstructorFromClass(@NotNull Class<?> cls) {
         Constructor<?>[] constructors = cls.getConstructors();
         if (constructors.length == 0)
             throw MissingConstructorException.from("Class '%s' has no constructors".formatted(cls.getName()));
@@ -96,17 +122,11 @@ public final class InjectorImpl implements Injector {
             if (!isParameterValid(parameter)) continue;
 
             Inject inject = parameter.getAnnotation(Inject.class);
-
             List<?> dependencies = this.resolveDependencies(type);
-            int ordinal = inject.ordinal();
-            if (dependencies.size() <= ordinal) {
-                if (inject.necessity() == Necessity.Required)
-                    throw MissingConstructorException.from("Required dependency '%s' in constructor '%s' could not be resolved".formatted(parameter.getName(), getConstructorName(constructor)));
+            if (inject.necessity() == Necessity.Required && dependencies.isEmpty())
+                throw MissingConstructorException.from("Required dependency '%s' in constructor '%s' could not be resolved".formatted(parameter.getName(), getConstructorName(constructor)));
 
-                continue;
-            }
-
-            Object dependency = dependencies.get(ordinal);
+            Object dependency = dependencies.get(0);
             arguments[i] = dependency;
         }
         return arguments;
