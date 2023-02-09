@@ -18,14 +18,14 @@ class InvocationTest {
         manager.register(new Object() {
             @Handler
             public void handle(@NotNull MockEvent event) {
-                event.getContext().setString("updated");
+                event.getContext().get().setString("updated");
             }
         });
 
         MockEvent event = MockEvent.from("initial");
         manager.invoke(event);
 
-        assertEquals("updated", event.getContext().getString());
+        assertEquals("updated", event.getContext().get().getString());
     }
 
     @Test
@@ -76,7 +76,7 @@ class InvocationTest {
         MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
-        assertEquals("B", event.getContext().getString());
+        assertEquals("B", event.getContext().get().getString());
     }
 
     @Test
@@ -89,7 +89,7 @@ class InvocationTest {
 
             @Handler
             public void handle(@NotNull MockEvent event) {
-                event.getContext().setString("B");
+                event.getContext().get().setString("B");
             }
         }
 
@@ -98,7 +98,7 @@ class InvocationTest {
 
         manager.invoke(event);
 
-        assertNotEquals("B", event.getContext().getString());
+        assertNotEquals("B", event.getContext().get().getString());
     }
 
     @Test
@@ -115,7 +115,7 @@ class InvocationTest {
         MockEvent event = MockEvent.from("A");
         assertThrows(EventInvocationException.class, () -> manager.invoke(event));
 
-        assertNotEquals("B", event.getContext().getString());
+        assertNotEquals("B", event.getContext().get().getString());
     }
 
     @Test
@@ -130,6 +130,6 @@ class InvocationTest {
         }));
         manager.invoke(event);
 
-        assertNotEquals("B", event.getContext().getString());
+        assertNotEquals("B", event.getContext().get().getString());
     }
 }

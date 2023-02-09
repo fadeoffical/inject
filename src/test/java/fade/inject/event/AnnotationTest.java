@@ -26,7 +26,7 @@ class AnnotationTest {
         MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
-        assertNotEquals("B", event.getContext().getString());
+        assertNotEquals("B", event.getContext().get().getString());
     }
 
     @Test
@@ -38,7 +38,7 @@ class AnnotationTest {
         assertDoesNotThrow(() -> manager.register(new Object() {
             @Ignore
             public void handle(@NotNull MockEvent event) {
-                event.getContext().setString("C");
+                event.getContext().get().setString("C");
             }
 
             @Handler
@@ -50,7 +50,7 @@ class AnnotationTest {
         MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
-        assertEquals("B", event.getContext().getString());
+        assertEquals("B", event.getContext().get().getString());
     }
 
     @Test
@@ -69,7 +69,7 @@ class AnnotationTest {
         MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
-        assertNotEquals("B", event.getContext().getString());
+        assertNotEquals("B", event.getContext().get().getString());
     }
 
     @Test
@@ -90,7 +90,7 @@ class AnnotationTest {
         MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
-        assertNotEquals("B", event.getContext().getString());
+        assertNotEquals("B", event.getContext().get().getString());
     }
 
     @Test
@@ -100,14 +100,14 @@ class AnnotationTest {
         assertDoesNotThrow(() -> manager.register(new Object() {
             @Ignore
             public void handle(@NotNull MockEvent event) {
-                event.getContext().setString("B");
+                event.getContext().get().setString("B");
             }
         }));
 
         MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
-        assertNotEquals("B", event.getContext().getString());
+        assertNotEquals("B", event.getContext().get().getString());
     }
 
     @Test
@@ -119,6 +119,6 @@ class AnnotationTest {
         MockEvent event = MockEvent.from("A");
         manager.invoke(event);
 
-        assertEquals("A", event.getContext().getString());
+        assertEquals("A", event.getContext().get().getString());
     }
 }

@@ -1,9 +1,6 @@
 package fade.inject;
 
-import fade.inject.exception.ConstructionException;
-import fade.inject.exception.InjectException;
-import fade.inject.exception.InvalidConstructorException;
-import fade.inject.exception.MissingConstructorException;
+import fade.inject.exception.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -56,7 +53,7 @@ public final class InjectorImpl implements Injector {
             List<?> dependencies = this.resolveDependencies(inject, field.getType());
             if (dependencies.isEmpty()) {
                 if (inject.necessity() == Necessity.Required)
-                    throw MissingConstructorException.from("Required dependency '%s' in class '%s' could not be resolved".formatted(field.getName(), type.getName()));
+                    throw DependencyResolutionException.from("Required dependency '%s' in class '%s' could not be resolved".formatted(field.getName(), type.getName()));
                 return;
             }
 
@@ -143,7 +140,7 @@ public final class InjectorImpl implements Injector {
             List<?> dependencies = this.resolveDependencies(inject, type);
             if (dependencies.isEmpty()) {
                 if (inject.necessity() == Necessity.Required)
-                    throw MissingConstructorException.from("Required dependency '%s' in constructor '%s' could not be resolved".formatted(parameter.getName(), getConstructorName(constructor)));
+                    throw DependencyResolutionException.from("Required dependency '%s' in constructor '%s' could not be resolved".formatted(parameter.getName(), getConstructorName(constructor)));
                 return null;
             }
 

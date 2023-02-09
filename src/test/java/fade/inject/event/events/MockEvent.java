@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 public final class MockEvent extends CancellableEvent implements Contextual<MockEvent.Context> {
 
     private final @NotNull Context context;
@@ -25,13 +27,8 @@ public final class MockEvent extends CancellableEvent implements Contextual<Mock
     }
 
     @Override
-    public @NotNull MockEvent.Context getContext() {
-        return this.context;
-    }
-
-    @Override
-    public boolean hasContext() {
-        return true;
+    public @NotNull Optional<MockEvent.Context> getContext() {
+        return Optional.of(this.context);
     }
 
     public static class Context {

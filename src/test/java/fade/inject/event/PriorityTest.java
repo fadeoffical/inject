@@ -29,7 +29,7 @@ class PriorityTest {
         MockEvent event = MockEvent.from("pre_invoke");
         manager.invoke(event);
 
-        assertEquals("higher ordinal", event.getContext().getString());
+        assertEquals("higher ordinal", event.getContext().get().getString());
     }
 
     @Test
@@ -53,6 +53,6 @@ class PriorityTest {
         MockEvent event = MockEvent.from("pre_invoke");
         manager.invoke(event);
 
-        assertEquals("normal", event.getContext().getString());
+        assertEquals("normal", event.getContext().get().getString());
     }
 }
