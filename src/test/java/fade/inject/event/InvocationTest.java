@@ -125,7 +125,6 @@ class InvocationTest {
         MockEvent event = MockEvent.from("A");
 
         assertThrows(EventException.class, () -> manager.register(new Object() {
-            @SuppressWarnings({"ParameterCanBeLocal", "UnusedAssignment", "ReassignedVariable", "AssignmentToMethodParameter"})
             @Handler
             public void handle() {}
         }));
