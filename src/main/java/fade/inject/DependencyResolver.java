@@ -1,11 +1,12 @@
 package fade.inject;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 @FunctionalInterface
 public interface DependencyResolver {
 
-    <T> List<WeakReference<? extends T>> resolve(Class<T> dependency);
+    @Nullable WeakReference<?> resolve(@NotNull String id, @NotNull Class<?> type);
 }

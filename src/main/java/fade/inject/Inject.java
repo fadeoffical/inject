@@ -8,10 +8,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
+@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 public @interface Inject {
 
     int ordinal() default 0;
+
+    @NotNull String id() default "";
 
     @NotNull Necessity necessity() default Necessity.Optional;
 }

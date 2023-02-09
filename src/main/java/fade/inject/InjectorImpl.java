@@ -12,8 +12,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
-import java.util.*;
-import java.util.stream.IntStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public final class InjectorImpl implements Injector {
 
@@ -43,14 +45,15 @@ public final class InjectorImpl implements Injector {
         List<Field> fields = getFieldsFromObject(object);
         fields.forEach(field -> {
             Inject inject = field.getAnnotation(Inject.class);
-            List<?> dependencies = this.resolveDependencies(type);
-            if (inject.necessity() == Necessity.Required && dependencies.isEmpty())
-                throw MissingConstructorException.from("Required dependency '%s' in class '%s' could not be resolved".formatted(field.getName(), type.getName()));
-
-            Object dependency = dependencies.get(0);
+            List<?> dependencies = this.resolveDependencies(inject, field.getType());
+            if (dependencies.isEmpty()) {
+                if (inject.necessity() == Necessity.Required)
+                    throw MissingConstructorException.from("Required dependency '%s' in class '%s' could not be resolved".formatted(field.getName(), type.getName()));
+                return;
+            }
 
             try {
-                field.set(object, dependency);
+                field.set(object, dependencies.get(0));
             } catch (IllegalAccessException e) {
                 throw InjectException.from("Could not inject value for '%s' into class '%s'".formatted(field.getName(), type.getName()), e);
             }
@@ -63,15 +66,15 @@ public final class InjectorImpl implements Injector {
     }
 
     @Override
-    public @Nullable Object resolveDependency(@NotNull Class<?> type) {
-        return this.resolveDependencies(type).stream().findFirst().orElse(null);
+    public @Nullable Object resolveDependency(@NotNull Inject annotation, @NotNull Class<?> type) {
+        return this.resolveDependencies(annotation, type).stream().findFirst().orElse(null);
     }
 
     @Override
-    public @NotNull List<?> resolveDependencies(@NotNull Class<?> type) {
+    public @NotNull List<?> resolveDependencies(@NotNull Inject annotation, @NotNull Class<?> type) {
         return this.resolvers.stream()
-                .map(resolver -> resolver.resolve(type))
-                .flatMap(Collection::stream)
+                .map(resolver -> resolver.resolve(annotation.id(), type))
+                .filter(Objects::nonNull)
                 .filter(reference -> !reference.refersTo(null))
                 .map(Reference::get)
                 .filter(Objects::nonNull)
@@ -81,11 +84,13 @@ public final class InjectorImpl implements Injector {
     private static @NotNull List<Field> getFieldsFromObject(@NotNull Object object) {
         Class<?> type = object.getClass();
         return Arrays.stream(type.getDeclaredFields())
-                .filter(field -> field.canAccess(object))
                 .filter(field -> field.isAnnotationPresent(Inject.class))
                 .filter(field -> {
+                    if (!field.canAccess(object))
+                        field.setAccessible(true);
+
                     try {
-                        return field.get(object) != null;
+                        return field.get(object) == null;
                     } catch (IllegalAccessException exception) {
                         throw InjectException.from("Could not check if field was already injected", exception);
                     }
@@ -115,22 +120,22 @@ public final class InjectorImpl implements Injector {
 
     private @NotNull Object[] populateConstructor(@NotNull Constructor<?> constructor) {
         Parameter[] parameters = constructor.getParameters();
-        Object[] arguments = IntStream.rangeClosed(0, parameters.length).mapToObj(value -> null).toArray();
-
-        for (int i = 0, parametersLength = parameters.length; i < parametersLength; i++) {
-            Parameter parameter = parameters[i];
+        Object[] arguments = Arrays.stream(parameters).map(parameter -> {
             Class<?> type = parameter.getType();
 
-            if (!isParameterValid(parameter)) continue;
+            if (!isParameterValid(parameter)) return null;
 
             Inject inject = parameter.getAnnotation(Inject.class);
-            List<?> dependencies = this.resolveDependencies(type);
-            if (inject.necessity() == Necessity.Required && dependencies.isEmpty())
-                throw MissingConstructorException.from("Required dependency '%s' in constructor '%s' could not be resolved".formatted(parameter.getName(), getConstructorName(constructor)));
+            List<?> dependencies = this.resolveDependencies(inject, type);
+            if (dependencies.isEmpty()) {
+                if (inject.necessity() == Necessity.Required)
+                    throw MissingConstructorException.from("Required dependency '%s' in constructor '%s' could not be resolved".formatted(parameter.getName(), getConstructorName(constructor)));
+                return null;
+            }
 
-            Object dependency = dependencies.get(0);
-            arguments[i] = dependency;
-        }
+            return dependencies.get(0);
+        }).toArray();
+
         return arguments;
     }
 

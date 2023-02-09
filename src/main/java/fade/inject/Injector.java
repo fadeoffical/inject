@@ -3,7 +3,6 @@ package fade.inject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
@@ -25,15 +24,15 @@ public interface Injector {
      *
      * @return The constructed and injected object.
      */
-    <T> @NotNull T construct(Class<? extends T> cls) throws InvocationTargetException, InstantiationException, IllegalAccessException;
+    <T> @NotNull T construct(Class<? extends T> cls);
 
     void inject(@NotNull Object object);
 
     void registerDependencyResolver(@NotNull DependencyResolver dependencyResolver);
 
-    @Nullable Object resolveDependency(@NotNull Class<?> type);
+    @Nullable Object resolveDependency(@NotNull Inject annotation, @NotNull Class<?> type);
 
-    @NotNull List<?> resolveDependencies(@NotNull Class<?> type);
+    @NotNull List<?> resolveDependencies(@NotNull Inject annotation, @NotNull Class<?> type);
 
     sealed interface InjectorBuilder extends Builder<Injector> permits InjectorBuilderImpl {
 
