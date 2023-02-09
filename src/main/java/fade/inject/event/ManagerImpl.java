@@ -176,8 +176,8 @@ public class ManagerImpl implements Manager {
     }
 
     private static int sortByPriorityOrdinal(Method lhs, Method rhs) {
-        int lhsPriorityOrdinal = lhs.getAnnotation(Handler.class).ordinal();
-        int rhsPriorityOrdinal = rhs.getAnnotation(Handler.class).ordinal();
+        int lhsPriorityOrdinal = lhs.getAnnotation(Handler.class).priorityOrdinal();
+        int rhsPriorityOrdinal = rhs.getAnnotation(Handler.class).priorityOrdinal();
         return Integer.compare(lhsPriorityOrdinal, rhsPriorityOrdinal);
     }
 }
