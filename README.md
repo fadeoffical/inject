@@ -49,8 +49,6 @@ You will also need a handler, which you need to register to the event manager. T
 type of the handler; either via the annotation or via the first parameter of the handler method as seen below:
 
 ```java
-import jdk.jfr.Event;
-
 public class ExampleHandler {
 
     @Handler(event = ExampleEvent.class)
