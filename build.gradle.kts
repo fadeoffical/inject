@@ -1,4 +1,9 @@
+// build uses unstable features
+// might've been a bad idea?
+@file:Suppress("UnstableApiUsage", "UNUSED_VARIABLE")
+
 plugins {
+    java
     `java-library`
     `maven-publish`
 }
@@ -13,6 +18,14 @@ repositories {
 dependencies {
     api("org.jetbrains:annotations:24.0.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+        }
+    }
 }
 
 group = "fade"
