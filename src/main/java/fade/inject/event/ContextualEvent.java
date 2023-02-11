@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 /**
- * <h1>Contextual Event</h1>
+ * <h2>Contextual Event</h2>
  * <p>This abstract subclass of {@link Event} is an implementation of the {@link Contextual} interface and is intended
  * to be used as a base for contextual events.</p>
  *
