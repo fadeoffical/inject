@@ -37,7 +37,7 @@ public class EventManagerImpl implements EventManager {
 
         return Arrays.stream(handlerClass.getDeclaredMethods())
                 .filter(method -> !Modifier.isStatic(method.getModifiers()))
-                .filter(method -> method.canAccess(handler))
+                .filter(method -> method.canAccess(handler) || method.trySetAccessible())
                 .map(method -> this.registerHandlerFromMethod(handler, method))
                 .map(methodRegistered -> methodRegistered ? 1 : 0)
                 .reduce(0, Integer::sum);

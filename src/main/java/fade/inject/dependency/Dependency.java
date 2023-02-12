@@ -13,6 +13,10 @@ public abstract class Dependency<T> {
         this.id = id;
     }
 
+    public static <T> @NotNull DependencyBuilder<T> ofType(@NotNull Class<T> type) {
+        return new DependencyBuilder<>(type);
+    }
+
     public @NotNull String getId() {
         return this.id;
     }
@@ -21,5 +25,5 @@ public abstract class Dependency<T> {
         return this.type;
     }
 
-    public abstract @Nullable T getDependencyInstance();
+    public abstract @Nullable T getObject();
 }

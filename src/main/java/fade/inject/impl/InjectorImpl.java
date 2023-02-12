@@ -48,6 +48,7 @@ public final class InjectorImpl implements Injector {
                 .toList();
     }
 
+    // todo: fix the spaghetti
     private static @NotNull Constructor<?> getConstructorFromClass(@NotNull Class<?> cls, int ordinal) {
         Constructor<?>[] constructors = cls.getConstructors();
         if (constructors.length == 0)
@@ -57,6 +58,9 @@ public final class InjectorImpl implements Injector {
             Constructor<?> constructor = constructors[ordinal];
             if (!isConstructorValid(constructor))
                 throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
+
+            if (!constructor.canAccess(null)) constructor.trySetAccessible();
+
             return constructor;
         }
 
@@ -66,11 +70,15 @@ public final class InjectorImpl implements Injector {
             Constructor<?> constructor = constructors[injectOrdinal];
             if (!isConstructorValid(constructor))
                 throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
+
+            if (!constructor.canAccess(null)) constructor.trySetAccessible();
+
             return constructor;
         }
 
         return Arrays.stream(constructors)
                 .filter(InjectorImpl::isConstructorValid)
+                .filter(constructor -> constructor.canAccess(null) || constructor.trySetAccessible())
                 .findFirst()
                 .orElseThrow(() -> MissingConstructorException.from("Class '%s' has no valid constructors".formatted(cls.getName())));
     }
@@ -131,7 +139,7 @@ public final class InjectorImpl implements Injector {
             }
 
             try {
-                field.set(object, dependency.getDependencyInstance());
+                field.set(object, dependency.getObject());
             } catch (IllegalAccessException e) {
                 throw InjectException.from("Could not inject value for '%s' into class '%s'".formatted(field.getName(), type.getName()), e);
             }
@@ -148,8 +156,7 @@ public final class InjectorImpl implements Injector {
         return this.dependencies.stream()
                 .filter(dependency -> type.isAssignableFrom(dependency.getType()))
                 .filter(dependency -> {
-                    if (inject.id().equals(""))
-                        return true;
+                    if (inject.id().equals("")) return true;
 
                     return dependency.getId().equals(inject.id());
                 })
@@ -168,13 +175,14 @@ public final class InjectorImpl implements Injector {
             Class<?> type = parameter.getType();
 
             Dependency<?> dependency = this.resolveDependency(inject, type);
+
             if (dependency == null) {
                 if (inject.necessity() == Necessity.Required)
                     throw DependencyResolutionException.from("Required dependency '%s' in constructor '%s' could not be resolved".formatted(parameter.getName(), getConstructorName(constructor)));
                 return null;
             }
 
-            return dependency;
+            return dependency.getObject();
         }).toArray();
 
         return arguments;
