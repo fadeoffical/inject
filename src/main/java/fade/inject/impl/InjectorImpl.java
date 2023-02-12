@@ -36,7 +36,7 @@ public final class InjectorImpl implements Injector {
 
         return objectFields.stream()
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                .filter(field -> field.canAccess(object) || field.trySetAccessible())
+                .filter(field -> assertAccess(field, object))
                 .filter(field -> field.isAnnotationPresent(Inject.class))
                 .filter(field -> {
                     try {
@@ -59,7 +59,8 @@ public final class InjectorImpl implements Injector {
             if (!isConstructorValid(constructor))
                 throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
 
-            if (!constructor.canAccess(null)) constructor.trySetAccessible();
+            if (!assertAccess(constructor, null))
+                throw AccessException.from("Cannot access constructor '%s' in class '%s'".formatted(getConstructorName(constructor), cls.getName()));
 
             return constructor;
         }
@@ -71,14 +72,15 @@ public final class InjectorImpl implements Injector {
             if (!isConstructorValid(constructor))
                 throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
 
-            if (!constructor.canAccess(null)) constructor.trySetAccessible();
+            if (!assertAccess(constructor, null))
+                throw AccessException.from("Cannot access constructor '%s' in class '%s'".formatted(getConstructorName(constructor), cls.getName()));
 
             return constructor;
         }
 
         return Arrays.stream(constructors)
                 .filter(InjectorImpl::isConstructorValid)
-                .filter(constructor -> constructor.canAccess(null) || constructor.trySetAccessible())
+                .filter(constructor -> assertAccess(constructor, null))
                 .findFirst()
                 .orElseThrow(() -> MissingConstructorException.from("Class '%s' has no valid constructors".formatted(cls.getName())));
     }
@@ -103,6 +105,10 @@ public final class InjectorImpl implements Injector {
     private static boolean isParameterValid(@NotNull Parameter parameter) {
         Inject inject = parameter.getAnnotation(Inject.class);
         return inject != null;
+    }
+
+    private static boolean assertAccess(@NotNull AccessibleObject accessible, @Nullable Object reference) {
+        return accessible.canAccess(reference) || accessible.trySetAccessible();
     }
 
     @Override
@@ -163,7 +169,6 @@ public final class InjectorImpl implements Injector {
                 .findFirst()
                 .orElse(null);
     }
-
 
     private @NotNull Object[] populateConstructor(@NotNull Constructor<?> constructor) {
         Parameter[] parameters = constructor.getParameters();
