@@ -1,6 +1,6 @@
 package fade.inject.exception.event;
 
-public final class PossibleMissingAnnotationException extends RuntimeException {
+public final class PossibleMissingAnnotationException extends EventException {
 
     private PossibleMissingAnnotationException(String message) {
         super(message);

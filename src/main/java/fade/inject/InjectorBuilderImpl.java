@@ -20,7 +20,7 @@ public final class InjectorBuilderImpl implements Injector.InjectorBuilder {
 
     @Override
     public @NotNull Injector build() {
-        return new InjectorImpl(this);
+        return new InjectorImpl(this.resolvers);
     }
 
     @Override

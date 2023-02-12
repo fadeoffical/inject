@@ -22,12 +22,11 @@ public interface Injector {
      *
      * @param cls The base class of the object to construct.
      * @param <T> The type of the base class (automatically inferred from the {@code cls} parameter).
-     *
      * @return The constructed and injected object.
      */
     <T> @NotNull T construct(Class<? extends T> cls);
 
-    <T> @NotNull T construct(Class<? extends T> cls, @Range(from = -1, to = 65535 ) int ordinal);
+    <T> @NotNull T construct(Class<? extends T> cls, @Range(from = -1, to = 65535) int ordinal);
 
     void inject(@NotNull Object object);
 

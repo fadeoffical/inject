@@ -1,6 +1,6 @@
 package fade.inject.exception.event;
 
-public final class PossibleMissingHandlerMethodsException extends RuntimeException {
+public final class PossibleMissingHandlerMethodsException extends EventException {
 
     private PossibleMissingHandlerMethodsException(String message) {
         super(message);

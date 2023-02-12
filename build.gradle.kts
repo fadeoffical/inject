@@ -36,13 +36,13 @@ testing {
 group = "fade"
 version = "1.0.0"
 description = "inject"
-java.sourceCompatibility = JavaVersion.VERSION_19
+java.sourceCompatibility = JavaVersion.VERSION_17
 
-//publishing {
-//    publications.create<MavenPublication>("maven") {
-//        from(components["java"])
-//    }
-//}
+publishing {
+    publications.create<MavenPublication>("maven") {
+        from(components["java"])
+    }
+}
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
