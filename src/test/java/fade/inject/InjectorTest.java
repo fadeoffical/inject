@@ -3,8 +3,6 @@ package fade.inject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.lang.ref.WeakReference;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -31,11 +29,7 @@ class InjectorTest {
     void testConstructorInjectionOfSimpleObject() {
         MockDependency dependency = new MockDependency();
 
-        Injector injector = Injector.builder().withResolver((id, type) -> {
-            if (type.isAssignableFrom(MockDependency.class))
-                return new WeakReference<>(dependency);
-            return null;
-        }).build();
+        Injector injector = Injector.builder().build();
 
         MockObject$testConstructorInjectionOfSimpleObject mockObject = injector.construct(MockObject$testConstructorInjectionOfSimpleObject.class);
 
@@ -50,11 +44,7 @@ class InjectorTest {
     void testFieldInjectionOfSimpleObject() {
         MockDependency dependency = new MockDependency();
 
-        Injector injector = Injector.builder().withResolver((id, type) -> {
-            if (type.isAssignableFrom(MockDependency.class))
-                return new WeakReference<>(dependency);
-            return null;
-        }).build();
+        Injector injector = Injector.builder().build();
 
         MockObject$testFieldInjectionOfSimpleObject mockObject = new MockObject$testFieldInjectionOfSimpleObject();
         injector.inject(mockObject);
