@@ -1,5 +1,8 @@
 package fade.inject.event;
 
+import fade.inject.api.event.EventManager;
+import fade.inject.api.event.Handler;
+import fade.inject.api.event.PriorityGroup;
 import fade.inject.event.events.MockEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

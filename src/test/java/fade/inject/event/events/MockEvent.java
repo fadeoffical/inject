@@ -1,7 +1,7 @@
 package fade.inject.event.events;
 
-import fade.inject.event.CancellableEvent;
-import fade.inject.event.Contextual;
+import fade.inject.api.event.CancellableEvent;
+import fade.inject.api.event.Contextual;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

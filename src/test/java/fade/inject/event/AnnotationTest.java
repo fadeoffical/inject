@@ -1,9 +1,11 @@
 package fade.inject.event;
 
-import fade.inject.Ignore;
+import fade.inject.api.Ignore;
+import fade.inject.api.event.EventManager;
+import fade.inject.api.event.Handler;
 import fade.inject.event.events.MockEvent;
-import fade.inject.exception.event.PossibleMissingAnnotationException;
-import fade.inject.exception.event.PossibleMissingHandlerMethodsException;
+import fade.inject.api.exception.event.PossibleMissingAnnotationException;
+import fade.inject.api.exception.event.PossibleMissingHandlerMethodsException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
