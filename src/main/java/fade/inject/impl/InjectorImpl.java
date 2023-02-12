@@ -1,10 +1,10 @@
 package fade.inject.impl;
 
-import fade.inject.api.Inject;
-import fade.inject.api.Injector;
-import fade.inject.api.Necessity;
-import fade.inject.api.dependency.Dependency;
-import fade.inject.api.exception.*;
+import fade.inject.Inject;
+import fade.inject.Injector;
+import fade.inject.Necessity;
+import fade.inject.dependency.Dependency;
+import fade.inject.exception.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;

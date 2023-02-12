@@ -1,7 +1,5 @@
 package fade.inject;
 
-import fade.inject.api.Inject;
-import fade.inject.api.Injector;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,7 @@
 package fade.inject.impl.event;
 
-import fade.inject.api.event.EventManager;
-import fade.inject.api.event.EventManagerBuilder;
+import fade.inject.event.EventManager;
+import fade.inject.event.EventManagerBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public final class EventManagerBuilderImpl implements EventManagerBuilder {

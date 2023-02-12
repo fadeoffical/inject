@@ -1,7 +1,7 @@
 package fade.inject.impl;
 
-import fade.inject.api.Injector;
-import fade.inject.api.InjectorBuilder;
+import fade.inject.Injector;
+import fade.inject.InjectorBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public final class InjectorBuilderImpl implements InjectorBuilder {

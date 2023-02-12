@@ -1,8 +1,8 @@
 package fade.inject.impl.event;
 
-import fade.inject.api.Ignore;
-import fade.inject.api.event.*;
-import fade.inject.api.exception.event.*;
+import fade.inject.Ignore;
+import fade.inject.event.*;
+import fade.inject.exception.event.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +49,7 @@ public class EventManagerImpl implements EventManager {
         String methodSignature = method.getDeclaringClass().getName() + '#' + method.getName();
         if (!method.isAnnotationPresent(Handler.class)) {
             if (isPotentialHandlerMethod(method))
-                throw PossibleMissingAnnotationException.from("Method '%s' has a first parameter that is a subclass of fade.inject.api.event.Event but is not annotated with fade.inject.event.@Handler. This is most likely unintentional. To suppress this exception, annotate the method with fade.inject.event.@Handler.Ignore".formatted(methodSignature));
+                throw PossibleMissingAnnotationException.from("Method '%s' has a first parameter that is a subclass of fade.inject.event.Event but is not annotated with fade.inject.event.@Handler. This is most likely unintentional. To suppress this exception, annotate the method with fade.inject.event.@Handler.Ignore".formatted(methodSignature));
             return false;
         }
 
@@ -78,7 +78,7 @@ public class EventManagerImpl implements EventManager {
 
             Class<?> parameterType0 = method.getParameterTypes()[0];
             if (!Event.class.isAssignableFrom(parameterType0))
-                throw EventTypeNotSpecifiedException.from("Method '%s' is annotated with fade.inject.event.@Handler but its first parameter is not a subclass of fade.inject.api.event.Event nor is an event type specified in the annotation".formatted(methodSignature));
+                throw EventTypeNotSpecifiedException.from("Method '%s' is annotated with fade.inject.event.@Handler but its first parameter is not a subclass of fade.inject.event.Event nor is an event type specified in the annotation".formatted(methodSignature));
 
             return parameterType0.asSubclass(Event.class);
         } else {
