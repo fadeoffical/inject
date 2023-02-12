@@ -1,9 +1,9 @@
 package fade.inject;
 
+import fade.inject.dependency.Dependency;
+import fade.inject.dependency.SingletonDependency;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.lang.ref.WeakReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -18,7 +18,8 @@ class InjectorTest {
         class MockObject {
 
             @Inject
-            public MockObject() {}
+            public MockObject() {
+            }
         }
 
         MockObject mockObject = injector.construct(MockObject.class);
@@ -29,15 +30,14 @@ class InjectorTest {
     @Test
     @DisplayName("constructor injection of simple object")
     void testConstructorInjectionOfSimpleObject() {
-        MockDependency dependency = new MockDependency();
+        MockDependency mock = new MockDependency();
 
-        Injector injector = Injector.builder().withResolver((id, type) -> {
-            if (type.isAssignableFrom(MockDependency.class))
-                return new WeakReference<>(dependency);
-            return null;
-        }).build();
+        Injector injector = Injector.builder().build();
+        SingletonDependency<MockDependency> dependency = SingletonDependency.ofType(MockDependency.class)
+                .andValue(mock);
+        injector.registerDependency(dependency);
 
-        MockObject$testConstructorInjectionOfSimpleObject mockObject = injector.construct(MockObject$testConstructorInjectionOfSimpleObject.class);
+        MockConstructorObject mockObject = injector.construct(MockConstructorObject.class);
 
         assertNotNull(mockObject);
         assertNotNull(mockObject.getDependency());
@@ -48,15 +48,14 @@ class InjectorTest {
     @Test
     @DisplayName("field injection of simple object")
     void testFieldInjectionOfSimpleObject() {
-        MockDependency dependency = new MockDependency();
+        MockDependency mock = new MockDependency();
 
-        Injector injector = Injector.builder().withResolver((id, type) -> {
-            if (type.isAssignableFrom(MockDependency.class))
-                return new WeakReference<>(dependency);
-            return null;
-        }).build();
+        Injector injector = Injector.builder().build();
+        Dependency<MockDependency> dependency = SingletonDependency.ofType(MockDependency.class).andValue(mock);
 
-        MockObject$testFieldInjectionOfSimpleObject mockObject = new MockObject$testFieldInjectionOfSimpleObject();
+        injector.registerDependency(dependency);
+
+        MockFieldObject mockObject = new MockFieldObject();
         injector.inject(mockObject);
 
         assertNotNull(mockObject);
@@ -67,12 +66,12 @@ class InjectorTest {
 
     // java has some a bug that prevents us from getting the annotations of constructor parameters in inner classes
     // so these classes down here provide for now until we can, someday hopefully, put these into the methods
-    private static class MockObject$testConstructorInjectionOfSimpleObject {
+    public static class MockConstructorObject {
 
         private final MockDependency dependency;
 
         @Inject
-        public MockObject$testConstructorInjectionOfSimpleObject(@Inject MockDependency dependency) {
+        public MockConstructorObject(@Inject MockDependency dependency) {
             this.dependency = dependency;
         }
 
@@ -81,7 +80,7 @@ class InjectorTest {
         }
     }
 
-    private static class MockObject$testFieldInjectionOfSimpleObject {
+    public static class MockFieldObject {
 
         @Inject
         private MockDependency dependency;

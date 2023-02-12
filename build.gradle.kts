@@ -34,7 +34,7 @@ testing {
 }
 
 group = "fade"
-version = "1.0.0"
+version = "0.0.1-alpha.0"
 description = "inject"
 java.sourceCompatibility = JavaVersion.VERSION_17
 

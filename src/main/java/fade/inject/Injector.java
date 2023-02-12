@@ -1,11 +1,10 @@
 package fade.inject;
 
+import fade.inject.impl.InjectorBuilderImpl;
+import fade.inject.dependency.Dependency;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
-
-import java.util.List;
-import java.util.Set;
 
 public interface Injector {
 
@@ -30,17 +29,7 @@ public interface Injector {
 
     void inject(@NotNull Object object);
 
-    void registerDependencyResolver(@NotNull DependencyResolver dependencyResolver);
+    void registerDependency(@NotNull Dependency<?> dependency);
 
-    @Nullable Object resolveDependency(@NotNull Inject annotation, @NotNull Class<?> type);
-
-    @NotNull List<?> resolveDependencies(@NotNull Inject annotation, @NotNull Class<?> type);
-
-    sealed interface InjectorBuilder extends Builder<Injector> permits InjectorBuilderImpl {
-
-        @NotNull InjectorBuilder withResolver(@NotNull DependencyResolver resolver);
-
-        @NotNull Set<DependencyResolver> getResolvers();
-
-    }
+    @Nullable Dependency<?> resolveDependency(@NotNull Inject inject, @NotNull Class<?> type);
 }

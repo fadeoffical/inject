@@ -1,6 +1,7 @@
-package fade.inject.event;
+package fade.inject.impl.event;
 
 import fade.inject.Ignore;
+import fade.inject.event.*;
 import fade.inject.exception.event.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +37,7 @@ public class EventManagerImpl implements EventManager {
 
         return Arrays.stream(handlerClass.getDeclaredMethods())
                 .filter(method -> !Modifier.isStatic(method.getModifiers()))
-                .filter(method -> method.canAccess(handler))
+                .filter(method -> method.canAccess(handler) || method.trySetAccessible())
                 .map(method -> this.registerHandlerFromMethod(handler, method))
                 .map(methodRegistered -> methodRegistered ? 1 : 0)
                 .reduce(0, Integer::sum);
@@ -73,11 +74,11 @@ public class EventManagerImpl implements EventManager {
 
         if (handlerEventClass == Event.class) {
             if (method.getParameterCount() == 0)
-                throw UnspecifiedEventTypeException.from("Method '%s' is annotated with 'fade.inject.event.@Handler' but has no declared event type; it has no parameters nor a specified event type via the annotation".formatted(methodSignature));
+                throw EventTypeNotSpecifiedException.from("Method '%s' is annotated with 'fade.inject.event.@Handler' but has no declared event type; it has no parameters nor a specified event type via the annotation".formatted(methodSignature));
 
             Class<?> parameterType0 = method.getParameterTypes()[0];
             if (!Event.class.isAssignableFrom(parameterType0))
-                throw UnspecifiedEventTypeException.from("Method '%s' is annotated with fade.inject.event.@Handler but its first parameter is not a subclass of fade.inject.event.Event nor is an event type specified in the annotation".formatted(methodSignature));
+                throw EventTypeNotSpecifiedException.from("Method '%s' is annotated with fade.inject.event.@Handler but its first parameter is not a subclass of fade.inject.event.Event nor is an event type specified in the annotation".formatted(methodSignature));
 
             return parameterType0.asSubclass(Event.class);
         } else {
@@ -87,7 +88,7 @@ public class EventManagerImpl implements EventManager {
             if (!Event.class.isAssignableFrom(parameterType0)) return handlerEventClass;
 
             if (!parameterType0.isAssignableFrom(handlerEventClass))
-                throw IncompatibleEventTypesException.from("Method '%s' has conflicting event types: The annotation specifies '%s' and the method signature takes '%s'; the type specified in the annotation must be a the same or a superclass of the type specified in the method signature".formatted(methodSignature, handlerEventClass.getName(), parameterType0.getName()));
+                throw EventTypeIncompatibleException.from("Method '%s' has conflicting event types: The annotation specifies '%s' and the method signature takes '%s'; the type specified in the annotation must be a the same or a superclass of the type specified in the method signature".formatted(methodSignature, handlerEventClass.getName(), parameterType0.getName()));
 
             return handlerEventClass;
         }

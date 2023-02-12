@@ -1,6 +1,6 @@
 package fade.inject.event;
 
-import fade.inject.Builder;
+import fade.inject.impl.event.EventManagerBuilderImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -8,8 +8,6 @@ import java.util.Optional;
 /**
  * An event manager is a class that holds a reference to all handler methods. It can register handlers and invoke them
  * by calling the {@link EventManager#invoke(Event)} method.
- *
-
  */
 public interface EventManager {
 
@@ -17,8 +15,8 @@ public interface EventManager {
         return EventManager.builder().build();
     }
 
-    static @NotNull EventManager.ManagerBuilder builder() {
-        return ManagerBuilderImpl.create();
+    static @NotNull EventManagerBuilder builder() {
+        return EventManagerBuilderImpl.create();
     }
 
     void register(@NotNull Object handler);
@@ -32,6 +30,4 @@ public interface EventManager {
     @NotNull Optional<Object> getHandler(@NotNull Class<?> handler);
 
     void invoke(@NotNull Event event);
-
-    sealed interface ManagerBuilder extends Builder<EventManager> permits ManagerBuilderImpl {}
 }

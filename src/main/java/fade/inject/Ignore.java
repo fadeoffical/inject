@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates a method or class that should be ignored by the {@link EventManager}. A class annotated by this will not be
- * scanned for
+ * scanned for handler methods. Additionally, it will not throw in case a handler class has no handler methods.
  *
  * @see EventManager#register(Object)
  */

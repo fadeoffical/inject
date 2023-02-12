@@ -1,22 +1,27 @@
-package fade.inject;
+package fade.inject.impl;
 
+import fade.inject.Inject;
+import fade.inject.Injector;
+import fade.inject.Necessity;
+import fade.inject.dependency.Dependency;
 import fade.inject.exception.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-import java.lang.ref.Reference;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public final class InjectorImpl implements Injector {
 
     private static final int UNSPECIFIED_ORDINAL = -1;
 
-    private final @NotNull Set<DependencyResolver> resolvers;
+    private final @NotNull List<Dependency<?>> dependencies;
 
-    InjectorImpl(@NotNull Set<DependencyResolver> resolvers) {
-        this.resolvers = new HashSet<>(resolvers);
+    InjectorImpl() {
+        this.dependencies = new ArrayList<>();
     }
 
     private static @NotNull List<Field> getFieldsFromObject(@NotNull Object object) {
@@ -31,7 +36,7 @@ public final class InjectorImpl implements Injector {
 
         return objectFields.stream()
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                .filter(field -> field.canAccess(object) || field.trySetAccessible())
+                .filter(field -> assertAccess(field, object))
                 .filter(field -> field.isAnnotationPresent(Inject.class))
                 .filter(field -> {
                     try {
@@ -39,18 +44,24 @@ public final class InjectorImpl implements Injector {
                     } catch (IllegalAccessException exception) {
                         throw InjectException.from("Could not check if field was already injected", exception);
                     }
-                }).toList();
+                })
+                .toList();
     }
 
+    // todo: fix the spaghetti
     private static @NotNull Constructor<?> getConstructorFromClass(@NotNull Class<?> cls, int ordinal) {
         Constructor<?>[] constructors = cls.getConstructors();
         if (constructors.length == 0)
             throw MissingConstructorException.from("Class '%s' has no constructors".formatted(cls.getName()));
 
-        if (ordinal != -1) {
+        if (ordinal != -1) { // todo: proper bounds check
             Constructor<?> constructor = constructors[ordinal];
             if (!isConstructorValid(constructor))
                 throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
+
+            if (!assertAccess(constructor, null))
+                throw AccessException.from("Cannot access constructor '%s' in class '%s'".formatted(getConstructorName(constructor), cls.getName()));
+
             return constructor;
         }
 
@@ -60,10 +71,18 @@ public final class InjectorImpl implements Injector {
             Constructor<?> constructor = constructors[injectOrdinal];
             if (!isConstructorValid(constructor))
                 throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
+
+            if (!assertAccess(constructor, null))
+                throw AccessException.from("Cannot access constructor '%s' in class '%s'".formatted(getConstructorName(constructor), cls.getName()));
+
             return constructor;
         }
 
-        return Arrays.stream(constructors).filter(InjectorImpl::isConstructorValid).findFirst().orElseThrow(() -> MissingConstructorException.from("Class '%s' has no valid constructors".formatted(cls.getName())));
+        return Arrays.stream(constructors)
+                .filter(InjectorImpl::isConstructorValid)
+                .filter(constructor -> assertAccess(constructor, null))
+                .findFirst()
+                .orElseThrow(() -> MissingConstructorException.from("Class '%s' has no valid constructors".formatted(cls.getName())));
     }
 
     private static boolean isConstructorValid(@NotNull Constructor<?> constructor) {
@@ -86,6 +105,10 @@ public final class InjectorImpl implements Injector {
     private static boolean isParameterValid(@NotNull Parameter parameter) {
         Inject inject = parameter.getAnnotation(Inject.class);
         return inject != null;
+    }
+
+    private static boolean assertAccess(@NotNull AccessibleObject accessible, @Nullable Object reference) {
+        return accessible.canAccess(reference) || accessible.trySetAccessible();
     }
 
     @Override
@@ -114,15 +137,15 @@ public final class InjectorImpl implements Injector {
         List<Field> fields = getFieldsFromObject(object);
         fields.forEach(field -> {
             Inject inject = field.getAnnotation(Inject.class);
-            List<?> dependencies = this.resolveDependencies(inject, field.getType());
-            if (dependencies.isEmpty()) {
+            Dependency<?> dependency = this.resolveDependency(inject, field.getType());
+            if (dependency == null) {
                 if (inject.necessity() == Necessity.Required)
                     throw DependencyResolutionException.from("Required dependency '%s' in class '%s' could not be resolved".formatted(field.getName(), type.getName()));
                 return;
             }
 
             try {
-                field.set(object, dependencies.get(0));
+                field.set(object, dependency.getObject());
             } catch (IllegalAccessException e) {
                 throw InjectException.from("Could not inject value for '%s' into class '%s'".formatted(field.getName(), type.getName()), e);
             }
@@ -130,36 +153,41 @@ public final class InjectorImpl implements Injector {
     }
 
     @Override
-    public void registerDependencyResolver(@NotNull DependencyResolver dependencyResolver) {
-        this.resolvers.add(dependencyResolver);
+    public void registerDependency(@NotNull Dependency<?> dependency) {
+        this.dependencies.add(dependency);
     }
 
     @Override
-    public @Nullable Object resolveDependency(@NotNull Inject annotation, @NotNull Class<?> type) {
-        return this.resolveDependencies(annotation, type).stream().findFirst().orElse(null);
-    }
+    public @Nullable Dependency<?> resolveDependency(@NotNull Inject inject, @NotNull Class<?> type) {
+        return this.dependencies.stream()
+                .filter(dependency -> type.isAssignableFrom(dependency.getType()))
+                .filter(dependency -> {
+                    if (inject.id().equals("")) return true;
 
-    @Override
-    public @NotNull List<?> resolveDependencies(@NotNull Inject annotation, @NotNull Class<?> type) {
-        return this.resolvers.stream().map(resolver -> resolver.resolve(annotation.id(), type)).filter(Objects::nonNull).filter(reference -> !reference.refersTo(null)).map(Reference::get).filter(Objects::nonNull).toList();
+                    return dependency.getId().equals(inject.id());
+                })
+                .findFirst()
+                .orElse(null);
     }
 
     private @NotNull Object[] populateConstructor(@NotNull Constructor<?> constructor) {
         Parameter[] parameters = constructor.getParameters();
         Object[] arguments = Arrays.stream(parameters).map(parameter -> {
-            Class<?> type = parameter.getType();
 
             if (!isParameterValid(parameter)) return null;
 
             Inject inject = parameter.getAnnotation(Inject.class);
-            List<?> dependencies = this.resolveDependencies(inject, type);
-            if (dependencies.isEmpty()) {
+            Class<?> type = parameter.getType();
+
+            Dependency<?> dependency = this.resolveDependency(inject, type);
+
+            if (dependency == null) {
                 if (inject.necessity() == Necessity.Required)
                     throw DependencyResolutionException.from("Required dependency '%s' in constructor '%s' could not be resolved".formatted(parameter.getName(), getConstructorName(constructor)));
                 return null;
             }
 
-            return dependencies.get(0);
+            return dependency.getObject();
         }).toArray();
 
         return arguments;
