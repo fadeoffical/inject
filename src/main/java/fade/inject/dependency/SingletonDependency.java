@@ -17,17 +17,6 @@ public final class SingletonDependency<T> extends Dependency<T> {
         this.singletonInstance = singletonInstance;
     }
 
-    /**
-     * Creates a new singleton dependency from a type, an optional id and the value
-     *
-     * @param type
-     * @return
-     * @param <T>
-     */
-    public static <T> @NotNull DependencyBuilder<T> ofType(@NotNull Class<T> type) {
-        return new DependencyBuilder<>(type);
-    }
-
     @Override
     public @Nullable T getObject() {
         return this.singletonInstance;
