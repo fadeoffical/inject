@@ -13,7 +13,7 @@ public abstract class Dependency<T> {
         this.id = id;
     }
 
-    public static <T> @NotNull DependencyBuilder<T> ofType(@NotNull Class<T> type) {
+    public static <T> @NotNull DependencyBuilder<? extends T> ofType(@NotNull Class<? extends T> type) {
         return new DependencyBuilder<>(type);
     }
 
@@ -23,6 +23,14 @@ public abstract class Dependency<T> {
 
     public @NotNull Class<T> getType() {
         return this.type;
+    }
+
+    public boolean isOfType(@NotNull Class<?> type) {
+        return type.isAssignableFrom(this.getType());
+    }
+
+    public boolean hasId(@NotNull String id) {
+        return this.getId().equals(id);
     }
 
     public abstract @Nullable T getObject();

@@ -1,5 +1,8 @@
 package fade.inject.event;
 
-import fade.inject.Builder;
+import org.jetbrains.annotations.NotNull;
 
-public interface EventManagerBuilder extends Builder<EventManager> { }
+public interface EventManagerBuilder {
+
+    @NotNull EventManager build();
+}

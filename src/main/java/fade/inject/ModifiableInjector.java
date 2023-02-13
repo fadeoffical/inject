@@ -1,9 +1,8 @@
-package fade.inject.impl;
+package fade.inject;
 
-import fade.inject.Inject;
-import fade.inject.Injector;
-import fade.inject.Necessity;
 import fade.inject.dependency.Dependency;
+import fade.inject.dependency.DependencyManager;
+import fade.inject.dependency.DependencyRegistry;
 import fade.inject.exception.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,14 +13,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class InjectorImpl implements Injector {
+public final class ModifiableInjector implements Injector, DependencyRegistry {
 
-    private static final int UNSPECIFIED_ORDINAL = -1;
+    private final DependencyManager dependencyManager;
 
-    private final @NotNull List<Dependency<?>> dependencies;
-
-    InjectorImpl() {
-        this.dependencies = new ArrayList<>();
+    ModifiableInjector(@NotNull List<Dependency<?>> dependencies) {
+        this.dependencyManager = DependencyManager.create();
     }
 
     private static @NotNull List<Field> getFieldsFromObject(@NotNull Object object) {
@@ -64,7 +61,7 @@ public final class InjectorImpl implements Injector {
         if (inject != null) return getConstructorWithOrdinal(type, inject.ordinal());
 
         return Arrays.stream(constructors)
-                .filter(InjectorImpl::isConstructorValid)
+                .filter(ModifiableInjector::isConstructorValid)
                 .filter(constructor -> assertAccess(constructor, null))
                 .findFirst()
                 .orElseThrow(() -> MissingConstructorException.from("Class '%s' has no valid constructors".formatted(type.getName())));
@@ -113,7 +110,7 @@ public final class InjectorImpl implements Injector {
 
     @Override
     public <T> @NotNull T construct(@NotNull Class<? extends T> cls) {
-        return this.construct(cls, InjectorImpl.UNSPECIFIED_ORDINAL);
+        return this.construct(cls, ModifiableInjector.UNSPECIFIED_ORDINAL);
     }
 
     @Override
@@ -192,5 +189,17 @@ public final class InjectorImpl implements Injector {
         }).toArray();
 
         return arguments;
+    }
+
+    @Override
+    public @NotNull DependencyRegistry register(@NotNull Dependency<?> dependency) {
+        this.dependencyManager.register(dependency);
+        return this;
+    }
+
+    @Override
+    public @NotNull DependencyRegistry registerAll(@NotNull List<Dependency<?>> dependencies) {
+        this.dependencyManager.registerAll(dependencies);
+        return this;
     }
 }

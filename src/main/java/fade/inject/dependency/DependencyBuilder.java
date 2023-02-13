@@ -20,14 +20,14 @@ public class DependencyBuilder<T> {
     }
 
     public @NotNull SingletonDependency<T> andValue(@NotNull T value) {
-        return new SingletonDependency<T>(this.type, this.id, value);
+        return new SingletonDependency<>(this.type, this.id, value);
     }
 
     public @NotNull SupplyingDependency<T> andSupplier(@NotNull Supplier<T> supplier) {
-        return new SupplyingDependency<T>(this.type, this.id, supplier);
+        return new SupplyingDependency<>(this.type, this.id, supplier);
     }
 
     public @NotNull WeakReferenceDependency<T> andWeakReference(@NotNull WeakReference<T> reference) {
-        return new WeakReferenceDependency<T>(this.type, this.id, reference);
+        return new WeakReferenceDependency<>(this.type, this.id, reference);
     }
 }

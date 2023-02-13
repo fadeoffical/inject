@@ -1,19 +1,12 @@
 package fade.inject;
 
-import fade.inject.impl.InjectorBuilderImpl;
-import fade.inject.dependency.Dependency;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 public interface Injector {
 
-    static @NotNull Injector create() {
-        return Injector.builder().build();
-    }
-
     static @NotNull InjectorBuilder builder() {
-        return InjectorBuilderImpl.create();
+        return new InjectorBuilder();
     }
 
     /**
@@ -28,8 +21,4 @@ public interface Injector {
     <T> @NotNull T construct(Class<? extends T> cls, @Range(from = -1, to = 65535) int ordinal);
 
     void inject(@NotNull Object object);
-
-    @NotNull Injector withDependency(@NotNull Dependency<?> dependency);
-
-    @Nullable Dependency<?> resolveDependency(@NotNull Inject inject, @NotNull Class<?> type);
 }
