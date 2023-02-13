@@ -29,7 +29,7 @@ public interface Injector {
 
     void inject(@NotNull Object object);
 
-    void registerDependency(@NotNull Dependency<?> dependency);
+    @NotNull Injector withDependency(@NotNull Dependency<?> dependency);
 
     @Nullable Dependency<?> resolveDependency(@NotNull Inject inject, @NotNull Class<?> type);
 }

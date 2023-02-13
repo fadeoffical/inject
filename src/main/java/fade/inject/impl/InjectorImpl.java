@@ -26,15 +26,7 @@ public final class InjectorImpl implements Injector {
 
     private static @NotNull List<Field> getFieldsFromObject(@NotNull Object object) {
         Class<?> type = object.getClass();
-
-        List<Field> objectFields = new ArrayList<>(List.of(type.getDeclaredFields()));
-        Class<?> superClass = type;
-        while (superClass.getSuperclass() != null) {
-            superClass = superClass.getSuperclass();
-            objectFields.addAll(List.of(superClass.getDeclaredFields()));
-        }
-
-        return objectFields.stream()
+        return getFieldsFromClassIncludingSuperclasses(type).stream()
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                 .filter(field -> assertAccess(field, object))
                 .filter(field -> field.isAnnotationPresent(Inject.class))
@@ -48,41 +40,49 @@ public final class InjectorImpl implements Injector {
                 .toList();
     }
 
+    @SuppressWarnings("NestedAssignment")
+    private static @NotNull List<Field> getFieldsFromClassIncludingSuperclasses(@NotNull Class<?> type) {
+        List<Field> fields = new ArrayList<>(List.of(type.getDeclaredFields()));
+
+        Class<?> current = type;
+        while ((current = current.getSuperclass()) != null) {
+            fields.addAll(List.of(current.getDeclaredFields()));
+        }
+
+        return fields;
+    }
+
     // todo: fix the spaghetti
-    private static @NotNull Constructor<?> getConstructorFromClass(@NotNull Class<?> cls, int ordinal) {
-        Constructor<?>[] constructors = cls.getConstructors();
+    private static @NotNull Constructor<?> getConstructorFromClass(@NotNull Class<?> type, int ordinal) {
+        Constructor<?>[] constructors = type.getConstructors();
         if (constructors.length == 0)
-            throw MissingConstructorException.from("Class '%s' has no constructors".formatted(cls.getName()));
+            throw MissingConstructorException.from("Class '%s' has no constructors".formatted(type.getName()));
 
-        if (ordinal != -1) { // todo: proper bounds check
-            Constructor<?> constructor = constructors[ordinal];
-            if (!isConstructorValid(constructor))
-                throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
+        if (ordinal != -1) return getConstructorWithOrdinal(type, ordinal);
 
-            if (!assertAccess(constructor, null))
-                throw AccessException.from("Cannot access constructor '%s' in class '%s'".formatted(getConstructorName(constructor), cls.getName()));
-
-            return constructor;
-        }
-
-        Inject inject = cls.getAnnotation(Inject.class);
-        if (inject != null) {
-            int injectOrdinal = inject.ordinal();
-            Constructor<?> constructor = constructors[injectOrdinal];
-            if (!isConstructorValid(constructor))
-                throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), cls.getName()));
-
-            if (!assertAccess(constructor, null))
-                throw AccessException.from("Cannot access constructor '%s' in class '%s'".formatted(getConstructorName(constructor), cls.getName()));
-
-            return constructor;
-        }
+        Inject inject = type.getAnnotation(Inject.class);
+        if (inject != null) return getConstructorWithOrdinal(type, inject.ordinal());
 
         return Arrays.stream(constructors)
                 .filter(InjectorImpl::isConstructorValid)
                 .filter(constructor -> assertAccess(constructor, null))
                 .findFirst()
-                .orElseThrow(() -> MissingConstructorException.from("Class '%s' has no valid constructors".formatted(cls.getName())));
+                .orElseThrow(() -> MissingConstructorException.from("Class '%s' has no valid constructors".formatted(type.getName())));
+    }
+
+    private static @NotNull Constructor<?> getConstructorWithOrdinal(@NotNull Class<?> type, @Range(from = 0, to = 65535) int ordinal) {
+        Constructor<?>[] constructors = type.getConstructors();
+        if (ordinal >= constructors.length)
+            throw OrdinalOutOfBoundsException.from("Ordinal '%s' is out of bounds".formatted(ordinal));
+
+        Constructor<?> constructor = constructors[ordinal];
+        if (!isConstructorValid(constructor))
+            throw InvalidConstructorException.from("Constructor '%s' in class '%s' is not a valid injectable constructor".formatted(getConstructorName(constructor), type.getName()));
+
+        if (!assertAccess(constructor, null))
+            throw AccessException.from("Cannot access constructor '%s' in class '%s'".formatted(getConstructorName(constructor), type.getName()));
+
+        return constructor;
     }
 
     private static boolean isConstructorValid(@NotNull Constructor<?> constructor) {
@@ -153,8 +153,9 @@ public final class InjectorImpl implements Injector {
     }
 
     @Override
-    public void registerDependency(@NotNull Dependency<?> dependency) {
+    public @NotNull Injector withDependency(@NotNull Dependency<?> dependency) {
         this.dependencies.add(dependency);
+        return this;
     }
 
     @Override

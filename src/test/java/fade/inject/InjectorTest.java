@@ -35,7 +35,7 @@ class InjectorTest {
         Injector injector = Injector.builder().build();
         SingletonDependency<MockDependency> dependency = SingletonDependency.ofType(MockDependency.class)
                 .andValue(mock);
-        injector.registerDependency(dependency);
+        injector.withDependency(dependency);
 
         MockConstructorObject mockObject = injector.construct(MockConstructorObject.class);
 
@@ -53,7 +53,7 @@ class InjectorTest {
         Injector injector = Injector.builder().build();
         Dependency<MockDependency> dependency = SingletonDependency.ofType(MockDependency.class).andValue(mock);
 
-        injector.registerDependency(dependency);
+        injector.withDependency(dependency);
 
         MockFieldObject mockObject = new MockFieldObject();
         injector.inject(mockObject);
