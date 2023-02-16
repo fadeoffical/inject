@@ -1,7 +1,6 @@
 package fade.inject;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Range;
 
 public interface Injector {
 
@@ -10,15 +9,13 @@ public interface Injector {
     }
 
     /**
-     * Constructs an object from the {@code cls}, injects the object with its dependencies and returns it.
+     * Constructs an object from the {@code type}, injects the object with its dependencies and returns it.
      *
-     * @param cls The base class of the object to construct.
-     * @param <T> The type of the base class (automatically inferred from the {@code cls} parameter).
+     * @param type The base class of the object to construct.
+     * @param <T> The type of the base class (automatically inferred from the {@code type} parameter).
      * @return The constructed and injected object.
      */
-    <T> @NotNull T construct(Class<? extends T> cls);
-
-    <T> @NotNull T construct(Class<? extends T> cls, @Range(from = -1, to = 65535) int ordinal);
+    <T> @NotNull T construct(Class<T> type);
 
     void inject(@NotNull Object object);
 }

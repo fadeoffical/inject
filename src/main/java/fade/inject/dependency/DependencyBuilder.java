@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 
 public class DependencyBuilder<T> {
 
-    private final @NotNull Class<T> type;
+    private final Class<T> type;
     private String id;
 
     DependencyBuilder(@NotNull Class<T> type) {

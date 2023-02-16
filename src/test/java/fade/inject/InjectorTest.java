@@ -13,7 +13,7 @@ class InjectorTest {
     @Test
     @DisplayName("construction of simple object")
     void testConstructionOfSimpleObject() {
-        Injector injector = Injector.create();
+        Injector injector = Injector.builder().createModifiable();
 
         class MockObject {
 
@@ -31,11 +31,10 @@ class InjectorTest {
     @DisplayName("constructor injection of simple object")
     void testConstructorInjectionOfSimpleObject() {
         MockDependency mock = new MockDependency();
+        ModifiableInjector injector = Injector.builder().createModifiable();
 
-        Injector injector = Injector.builder().build();
-        SingletonDependency<MockDependency> dependency = SingletonDependency.ofType(MockDependency.class)
-                .andValue(mock);
-        injector.withDependency(dependency);
+        SingletonDependency<MockDependency> dependency = SingletonDependency.ofType(MockDependency.class).andValue(mock);
+        injector.register(dependency);
 
         MockConstructorObject mockObject = injector.construct(MockConstructorObject.class);
 
@@ -50,17 +49,17 @@ class InjectorTest {
     void testFieldInjectionOfSimpleObject() {
         MockDependency mock = new MockDependency();
 
-        Injector injector = Injector.builder().build();
+        ModifiableInjector injector = Injector.builder().createModifiable();
         Dependency<MockDependency> dependency = SingletonDependency.ofType(MockDependency.class).andValue(mock);
 
-        injector.withDependency(dependency);
+        injector.register(dependency);
 
         MockFieldObject mockObject = new MockFieldObject();
         injector.inject(mockObject);
 
-        assertNotNull(mockObject);
-        assertNotNull(mockObject.getDependency());
-        assertEquals("mock", mockObject.getDependency().mockString());
+        assertNotNull(mockObject, "'mockObject' is null");
+        assertNotNull(mockObject.getDependency(), "'mockObject#getDependency' is null");
+        assertEquals("mock", mockObject.getDependency().mockString(), "'mockObject#getDepdency#mockString()' is not equal to 'mock'");
 
     }
 

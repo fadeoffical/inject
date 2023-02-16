@@ -25,11 +25,11 @@ public final class InjectorBuilder {
         return this;
     }
 
-    public @NotNull Injector createModifiable() {
+    public @NotNull ModifiableInjector createModifiable() {
         return new ModifiableInjector(this.dependencies);
     }
 
     public @NotNull Injector create() {
-
+        return new UnmodifiableInjector(this.dependencies);
     }
 }

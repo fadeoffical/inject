@@ -5,19 +5,19 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class Dependency<T> {
 
-    private final @NotNull Class<T> type;
-    private final @NotNull String id;
+    private final Class<T> type;
+    private final String id;
 
     Dependency(@NotNull Class<T> type, @NotNull String id) {
         this.type = type;
         this.id = id;
     }
 
-    public static <T> @NotNull DependencyBuilder<? extends T> ofType(@NotNull Class<? extends T> type) {
+    public static <T> @NotNull DependencyBuilder<T> ofType(@NotNull Class<T> type) {
         return new DependencyBuilder<>(type);
     }
 
-    public @NotNull String getId() {
+    public @Nullable String getId() {
         return this.id;
     }
 
@@ -29,8 +29,8 @@ public abstract class Dependency<T> {
         return type.isAssignableFrom(this.getType());
     }
 
-    public boolean hasId(@NotNull String id) {
-        return this.getId().equals(id);
+    public boolean isIdEqual(@NotNull String id) {
+        return "".equals(id) || id.equals(this.getId());
     }
 
     public abstract @Nullable T getObject();

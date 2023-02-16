@@ -15,8 +15,8 @@ public class DependencyManager implements DependencyRegistry, DependencyResolver
         this.dependencies = new HashSet<>();
     }
 
-    public static @NotNull DependencyManager create() {
-        return new DependencyManager();
+    public static @NotNull DependencyManagerBuilder builder() {
+        return new DependencyManagerBuilder();
     }
 
 
@@ -27,14 +27,14 @@ public class DependencyManager implements DependencyRegistry, DependencyResolver
 
     @Override
     public @NotNull List<Dependency<?>> resolveAll(@NotNull String id) {
-        return this.dependencies.stream().filter(dependency -> dependency.hasId(id)).toList();
+        return this.dependencies.stream().filter(dependency -> dependency.isIdEqual(id)).toList();
     }
 
     @Override
     public @NotNull List<Dependency<?>> resolveAll(@NotNull Class<?> type, @NotNull String id) {
         return this.dependencies.stream()
                 .filter(dependency -> dependency.isOfType(type))
-                .filter(dependency -> dependency.hasId(id))
+                .filter(dependency -> dependency.isIdEqual(id))
                 .toList();
     }
 

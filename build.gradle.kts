@@ -13,9 +13,16 @@ repositories {
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
+
+//    maven {
+//        name = "github-mirror"
+//        url = uri("https://maven.pkg.github.com/fadeoffical/mirror")
+//    }
 }
 
 dependencies {
+    implementation("fade:mirror:0.0.2-beta.0")
+
     api("org.jetbrains:annotations:24.0.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 }
