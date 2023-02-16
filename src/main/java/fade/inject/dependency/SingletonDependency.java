@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class SingletonDependency<T> extends Dependency<T> {
 
-    private final @Nullable T singletonInstance;
+    private final T singletonInstance;
 
     SingletonDependency(@NotNull Class<T> type, @NotNull String id, @Nullable T singletonInstance) {
         super(type, id);
