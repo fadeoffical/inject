@@ -1,23 +1,25 @@
-// build uses unstable features
-// might've been a bad idea?
-@file:Suppress("UnstableApiUsage", "UNUSED_VARIABLE")
+group = "fade"
+version = "0.0.1-alpha.0"
+description = "inject"
+
+if (System.getenv().containsKey("CI_GITHUB")) {
+    val branchName = System.getenv("CI_GITHUB_BRANCH")
+    if (branchName == "develop") version = "${(version as String)}+$branchName" // this is a bit stupid but whatever
+}
 
 plugins {
-    java
-    `java-library`
-    `maven-publish`
+    id("java-library")
+    id("maven-publish")
 }
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
+    mavenCentral()
 
-//    maven {
-//        name = "github-mirror"
-//        url = uri("https://maven.pkg.github.com/fadeoffical/mirror")
-//    }
+    maven {
+        name = "github-mirror"
+        url = uri("https://maven.pkg.github.com/fadeoffical/mirror")
+    }
 }
 
 dependencies {
@@ -30,25 +32,8 @@ dependencies {
 java {
     withJavadocJar()
     withSourcesJar()
-}
 
-testing {
-    suites {
-        val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter()
-        }
-    }
-}
-
-group = "fade"
-version = "0.0.1-alpha.0"
-description = "inject"
-java.sourceCompatibility = JavaVersion.VERSION_17
-
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-    }
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType<JavaCompile> {
@@ -57,4 +42,24 @@ tasks.withType<JavaCompile> {
 
 tasks.withType<Javadoc> {
     options.encoding = "UTF-8"
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "github"
+            url = uri("https://maven.pkg.github.com/fadeoffical/mirror")
+            credentials {
+                username = System.getenv("CI_GITHUB_USERNAME")
+                password = System.getenv("CI_GITHUB_PASSWORD")
+            }
+        }
+    }
+    publications.create<MavenPublication>("maven") {
+        from(components["java"])
+    }
 }
