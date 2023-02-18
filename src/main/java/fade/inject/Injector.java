@@ -17,5 +17,10 @@ public interface Injector {
      */
     <T> @NotNull T construct(Class<T> type);
 
+    /**
+     * Injects the dependencies of the {@code object}.
+     *
+     * @param object The object to inject.
+     */
     void inject(@NotNull Object object);
 }
